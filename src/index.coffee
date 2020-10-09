@@ -4,8 +4,8 @@ ParserState = require "./ParserState"
 Parser      = require "./Parser"
 
 module.exports = {
-  ...constants
-  ...helpers
+  constants...
+  helpers...
   ParserState
   Parser
 }
