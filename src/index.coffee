@@ -99,11 +99,28 @@ class Parser
       return unless state.error then state
       else (f state.errorProps()).pf state
   
-  # mapFromData :: Iterable t -> Parser t a d ~> ({a, d} -> b) -> Parser t b d
+  # mapFromData :: Iterable t => Parser t a d ~> ({a, d} -> b) -> Parser t b d
   mapFromData: (f) ->
     pf = @pf
     return new Parser (s) ->
       state = pf s
-      if state.error then return state
-      return state.resultify f state.dataProps()
+      return if state.error then state
+      else state.resultify f state.dataProps()
+
+  # chainFromData :: Iterable t => Parser t a d ~> ({a, d} -> Parser t b e) -> Parser t b e
+  chainFromData: (f) ->
+    pf = @pf
+    return new Parser (s) ->
+      state = pf s
+      return if state.error then state
+      else (f state.dataProps()).pf state
+
+  mapData: (f) ->
+    pf = @pf
+    return new Parser (s) ->
+      state = pf s
+      return state.dataify f state.data
+
+  @of: (x) -> new Parser (s) -> s.resultify(x)
+
   
