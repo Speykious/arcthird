@@ -37,7 +37,7 @@ class Parser
       if fnstate.error then return fnstate
       return fnstate.resultify fnstate.result argstate.result
   
-  # errorMap :: Iterable t => Parser t a d ~> (Parser t a d -> String) -> Parser t a d
+  # errorMap :: Iterable t => Parser t a d ~> ({d, String, Int} -> String) -> Parser t a d
   errorMap: (f) ->
     pf = @pf
     return new Parser (s) ->
@@ -45,7 +45,7 @@ class Parser
       return unless state.error then state
       else state.errorify f state.errorProps()
     
-  # errorChain :: Iterable t => Parser t a d ~> ({String, Int, d} -> Parser t a d) -> Parser t a d
+  # errorChain :: Iterable t => Parser t a d ~> ({d, String, Int} -> Parser t a d) -> Parser t a d
   errorChain: (f) ->
     pf = @pf
     return new Parser (s) ->
@@ -69,12 +69,14 @@ class Parser
       return if state.error then state
       else (f state.dataProps()).pf state
 
+  # mapData :: Iterable t => Parser t a d ~> (d -> e) -> Parser t a e
   mapData: (f) ->
     pf = @pf
     return new Parser (s) ->
       state = pf s
       return state.dataify f state.data
 
+  # of :: Iterable t => Parser t a d ~> x -> Parser t x d
   @of: (x) -> new Parser (s) -> s.resultify(x)
 
 module.exports = Parser
