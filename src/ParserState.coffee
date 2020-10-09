@@ -24,12 +24,12 @@ class ParserState
 
   dataProps: -> ({
     result: @result
-    data: @data
+    data:   @data
   })
 
-  resultify: (result) -> new ParserState({ ...@props(), result })
-  errorify:  (error)  -> new ParserState({ ...@props(), error })
-  dataify:   (data)   -> new ParserState({ ...@props(), data })
-  update: (result, index) -> new ParserState({ ...@props(), result, index })
+  resultify: (result) -> new ParserState({ @props()..., result })
+  errorify:  (error)  -> new ParserState({ @props()..., error })
+  dataify:   (data)   -> new ParserState({ @props()..., data })
+  update: (result, index) -> new ParserState({ @props()..., result, index })
   
 module.exports = ParserState
