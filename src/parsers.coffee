@@ -1,5 +1,6 @@
 Parser                 = require "./Parser"
 { reErrorExpectation } = require "./constants"
+{ getCharacterLength } = require "./helpers"
 
 # getData :: Parser t a d
 getData = new Parser (s) ->
@@ -130,8 +131,24 @@ mapTo = (f) ->
     return if s.error then s
     else s.resultify f s.result
 
-# errorMapTo :: (ParserState t a d -> String) -> Parser t a d
+# errorMapTo :: ({d, String, Int} -> String) -> Parser t a d
 errorMapTo = (f) ->
   new Parser (s) ->
     return unless s.error then s
-    else s.errorify f s
+    else s.errorify f s.errorProps()
+
+# char :: Char -> Parser String Char d
+char = (c) ->
+  if not c or getCharacterLength c isnt 1
+    throw new TypeError "char must be called with a single character, got #{c} instead"
+  return new Parser (s) ->
+    unless typeof s.target is "string"
+      throw new TypeError "char expects a string target, got #{typeof s.target} instead"
+    if s.error then return s
+    { index, target } = s
+    if index < target.length
+      char = target[index]
+      return if char is c then s.update c, index + 1
+      else s.errorify "ParseError (position #{index}): Expecting character '#{c}', got '#{char}'"
+    return s.errorify "ParseError (position #{index}): Expecting character '#{c}', got end of input"
+
