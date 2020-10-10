@@ -137,9 +137,13 @@ errorMapTo = (f) ->
     return unless s.error then s
     else s.errorify f s.errorProps()
 
+###
+NOTE: Here I made `char` and `anyChar` only work for strings. Maybe in the future I would allow other types of arrays.
+###
+
 # char :: Char -> Parser String Char d
 char = (c) ->
-  if not c or getCharacterLength c isnt 1
+  unless c and c.length is 1
     throw new TypeError "char must be called with a single character, got #{c} instead"
   return new Parser (s) ->
     unless typeof s.target is "string"
@@ -151,4 +155,20 @@ char = (c) ->
       return if char is c then s.update c, index + 1
       else s.errorify "ParseError (position #{index}): Expecting character '#{c}', got '#{char}'"
     return s.errorify "ParseError (position #{index}): Expecting character '#{c}', got end of input"
+
+# anyChar :: Parser String Char d
+anyChar = new Parser (s) ->
+  unless typeof s.target is "string"
+    throw new TypeError "anyChar expects a string target, got #{typeof s.target} instead"
+  if s.error then return s
+  { index, target } = s
+  return if index < target.length then s.update target[index], index + 1
+  else s.errorify "ParseError (position #{index}): Expecting character '#{target[index]}', got end of input"
+
+# peek :: Parser
+peek = new Parser (s) ->
+  if s.error then return s
+  { index, target } = s
+  return if index < target.length then s.update target.charCodeAt(index), index + 1
+  else s.errorify "ParseError (position #{index}): Unexpected end of input"
 
