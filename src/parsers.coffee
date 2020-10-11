@@ -172,3 +172,73 @@ peek = new Parser (s) ->
   return if index < target.length then s.update target.charCodeAt(index), index + 1
   else s.errorify "ParseError (position #{index}): Unexpected end of input"
 
+# str :: String -> Parser String String d
+str = (xs) ->
+  unless xs and xs.length > 0
+    throw new TypeError "str must be called with a string with length > 0, got #{xs} instead"
+  return new Parser (s) ->
+    unless typeof s.target is "string"
+      throw new TypeError "char expects a string target, got #{typeof s.target} instead"
+    if s.error then return s
+    { index, target } = s
+    if index >= target.length
+      return s.errorify "ParseError (position #{index}): Expecting string '#{xs}', got end of input"
+    sai = target.slice index, index + xs.length
+    return if xs is sai then s.update xs, index + xs.length
+    else s.errorify "ParseError (position #{index}): Expecting string '#{xs}', got '#{sai}...'"
+
+# regex :: RegExp -> Parser String String d
+regex = (re) ->
+  unless re instanceof RegExp
+    throw new TypeError "regex must be called with a RegExp"
+  unless re.source[0] is "^"
+    throw new Error "regex parser must contain '^' start assertion"
+  return new Parser (s) ->
+    if s.error then return s
+    { target, index } = s
+    rest = target.slice index
+    if rest.length < 1
+      return s.errorify "ParseError (position #{index}): Expecting string matching '#{re}', got end of input"
+    match = rest.match re
+    return if match then s.update match[0], index + match[0].length
+    else s.errorify "ParseError (position #{index}: Expecting string matching '#{re}', got '#{rest.slice 0, 5}...'"
+
+# digit :: Parser String String d
+digit = new Parser (s) ->
+  if s.error then return s
+  { target, index } = s
+  if index >= target.length
+    return s.errorify "ParseError (position #{index}): Expecting digit, got end of input"
+  char = target[index]
+  return if reDigit.test char then state.update char, index + 1
+  else s.errorify "ParseError (position #{index}): Expecting digit, got '#{char}'"
+
+# digits :: Parser String String d
+digits = (regex reDigits).errorMap ({ index }) ->
+  "ParseError (position #{index}): Expecting digits"
+
+# letter :: Parser String String d
+letter = new Parser (s) ->
+  if s.error then return s
+  { target, index } = s
+  if index >= target.length
+    return s.errorify "ParseError (position #{index}): Expecting letter, got end of input"
+  char = target[index]
+  return if reLetter.test char then state.update char, index + 1
+  else s.errorify "ParseError (position #{index}): Expecting letter, got '#{char}'"
+
+# letter :: Parser String String d
+letter = (regex reLetters).errorMap ({ index }) ->
+  "ParseError (position #{index}): Expecting letters"
+
+# anyOfString :: String -> Parser String Char d
+anyOfString = (xs) ->
+  new Parser (s) ->
+    if s.error then return s
+    { target, index } = s
+    if index >= target.length
+      return s.errorify "ParseError (position #{index}): Expecting any of the string \"#{xs}\", got end of input"
+    char = target[index]
+    return if xs.includes char then state.update char, index + 1
+    else s.errorify "ParseError (position #{index}): Expecting any of the string \"#{xs}\", got '#{char}'"
+
