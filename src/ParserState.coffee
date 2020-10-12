@@ -1,7 +1,9 @@
+PStream = require "./PStream"
+
 class ParserState
-  constructor: (props) ->
-    unless isIterable props.target
-      throw new Error "Target (#{props.target}) is not iterable"
+  constructor: (props) ->  
+    unless props.target instanceof PStream
+      throw new Error "Target (#{props.target}) is not an instance of PStream"
     @target = props.target
     @data   = props.data   or null
     @error  = props.error  or null
