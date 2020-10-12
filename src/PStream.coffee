@@ -14,16 +14,4 @@ class PStream
   # next :: () -> a
   next: -> @elementAt @index++
   
-  # isTypedArray :: () -> Bool
-  isTypedArray: ->
-    @structure instanceof Uint8Array        ||
-    @structure instanceof Uint8ClampedArray ||
-    @structure instanceof Int8Array         ||
-    @structure instanceof Uint16Array       ||
-    @structure instanceof Int16Array        ||
-    @structure instanceof Uint32Array       ||
-    @structure instanceof Int32Array        ||
-    @structure instanceof Float32Array      ||
-    @structure instanceof Float64Array
-
 module.exports = PStream
