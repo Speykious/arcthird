@@ -111,8 +111,8 @@ many = (parser) ->
       s = parser.pf s
       if s.isError then break
       results.push s
-      # Hmmm... This line below makes me doubt about abstraction on iterables...
-      if s.target.length and s.index >= s.target.length then break
+      { target, index } = s
+      if target.length() and index >= target.length() then break
     return s.resultify results
 
 # atLeast :: PStream t => Int -> Parser t a d -> Parser t [a] d
