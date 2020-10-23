@@ -1,4 +1,3 @@
-# class PStream a
 class PStream
   constructor: (@structure) ->
     @index = 0
