@@ -18,7 +18,7 @@ class Parser
       return if state.error then state
       else state.resultify f state.result
   
-  # chain :: Iterable t -> Parser t a d ~> (a -> Parser t b d) -> Parser t b d
+  # chain :: PStream t => Parser t a d ~> (a -> Parser t b d) -> Parser t b d
   chain: (f) ->
     pf = @pf
     return new Parser (s) ->
@@ -26,7 +26,7 @@ class Parser
       return if state.error then state
       else (f state.result).pf state
   
-  # ap :: Iterable t -> Parser t a d ~> Parser t (a -> b) d -> Parser t b d
+  # ap :: PStream t => Parser t a d ~> Parser t (a -> b) d -> Parser t b d
   ap: (poff) ->
     pf = @pf
     return new Parser (s) ->
