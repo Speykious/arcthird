@@ -36,6 +36,11 @@ class StringPStream extends PStream
   
   length: -> @structure.byteLength
   elementAt: (i) -> @structure.getUint8 i
+  
+  getString: (index, length) ->
+    bytes = Uint8Array.from { length }, (_, i) ->
+      @structure.getUint8 index + i
+    return decoder.decode bytes
 
   getUtf8Char: (index, length) ->
     dvs = @structure
@@ -51,4 +56,7 @@ class StringPStream extends PStream
     else if (byte & 0xf0) >> 4 is 0b1111 then 4
     else 1
   
-  
+module.exports = {
+  encoder, decoder
+  StringPStream
+}
