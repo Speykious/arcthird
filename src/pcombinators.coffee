@@ -1,6 +1,5 @@
 Parser                     = require "./Parser"
 { reErrorExpectation }     = require "./constants"
-{ getCharacterLength }     = require "./helpers"
 { StringPStream, decoder } = require "./pstreams"
 
 # getData :: PStream t => Parser t a d

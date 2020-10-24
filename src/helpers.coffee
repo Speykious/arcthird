@@ -1,5 +1,5 @@
-# getCharacterLength :: String -> Int
-getCharacterLength = (str) ->
+# charlength :: String -> Int
+charlength = (str) ->
   total = 0
   i = 0
   while i < str.length
@@ -23,6 +23,6 @@ isTypedArray = (x) ->
   x instanceof Float64Array
 
 module.exports = {
-  getCharacterLength
+  charlength
   isTypedArray
 }
