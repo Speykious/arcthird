@@ -1,5 +1,5 @@
 { reDigit, reDigits, reLetter, reLetters, reWhitespaces } = require "./constants"
-{ encoder } = require "./PStreams"
+{ encoder } = require "./pstreams"
 
 # char :: StringPStream t => Char -> Parser t Char d
 char = (c) ->

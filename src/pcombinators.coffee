@@ -1,7 +1,7 @@
 Parser                     = require "./Parser"
 { reErrorExpectation }     = require "./constants"
 { getCharacterLength }     = require "./helpers"
-{ StringPStream, decoder } = require "./PStreams"
+{ StringPStream, decoder } = require "./pstreams"
 
 # getData :: PStream t => Parser t a d
 getData = new Parser (s) ->
