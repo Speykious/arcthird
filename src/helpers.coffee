@@ -1,3 +1,5 @@
+{ inspect } = require "util"
+
 # charlength :: String -> Int
 charlength = (str) ->
   total = 0
@@ -22,7 +24,10 @@ isTypedArray = (x) ->
   x instanceof Float32Array      ||
   x instanceof Float64Array
 
+insp = (o) -> inspect o, false, 4
+
 module.exports = {
   charlength
   isTypedArray
+  insp
 }
