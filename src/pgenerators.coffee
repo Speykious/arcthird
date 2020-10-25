@@ -1,21 +1,25 @@
 { reDigit, reDigits, reLetter, reLetters, reWhitespaces } = require "./constants"
-{ charlength }     = require "./helpers"
-{ encoder } = require "./pstreams"
+{ charlength, insp } = require "./helpers"
+{ encoder, StringPStream } = require "./pstreams"
+Parser = require "./Parser"
+{ possibly } = require "./pcombinators"
 
 # char :: StringPStream t => Char -> Parser t Char d
 char = (c) ->
-  unless c and charlength c is 1
-    throw new TypeError "char must be called with a single character, got #{c} instead"
+  unless c and (charlength c) is 1
+    throw new TypeError "char must be called with a single character, got #{insp c} instead"
   return new Parser (s) ->
     unless s.target instanceof StringPStream
       throw new TypeError "char expects a StringPStream instance as target, got #{typeof s.target} instead"
     if s.isError then return s
     { index, target } = s
     if index < target.length()
-      char = target.elementAt(index)
-      return if char is c then s.update c, index + 1
-      else s.errorify "ParseError (position #{index}): Expecting character '#{c}', got '#{char}'"
-    return s.errorify "ParseError (position #{index}): Expecting character '#{c}', got end of input"
+      charWidth = target.getCharWidth index
+      if index + charWidth <= target.length()
+        char = target.getUtf8Char index, charWidth
+        return if char is c then s.update c, index + 1
+        else s.errorify "ParseError (position #{index}): Expecting character #{insp c}, got #{insp char}"
+    return s.errorify "ParseError (position #{index}): Expecting character #{insp c}, got end of input"
 
 # anyChar :: StringPStream t => Parser t Char d
 anyChar = new Parser (s) ->
@@ -23,19 +27,19 @@ anyChar = new Parser (s) ->
     throw new TypeError "anyChar expects a StringPStream instance as target, got #{typeof s.target} instead"
   if s.isError then return s
   { index, target } = s
-  return if index < target.length() then s.update target.elementAt(index), index + 1
+  return if index < target.length() then s.update (target.elementAt index), index + 1
   else s.errorify "ParseError (position #{index}): Expecting any character, got end of input"
 
 # peek :: Parser
 peek = new Parser (s) ->
   if s.isError then return s
   { index, target } = s
-  return if index < target.length() then s.resultify target.elementAt(index)
+  return if index < target.length() then s.resultify target.elementAt index
   else s.errorify "ParseError (position #{index}): Unexpected end of input"
 
 # str :: StringPStream t => String -> Parser t String d
 str = (xs) ->
-  unless xs and charlength xs > 0
+  unless xs and (charlength xs) > 0
     throw new TypeError "str must be called with a string with length > 0, got #{xs} instead"
   es = encoder.encode xs
   return new Parser (s) ->
@@ -76,7 +80,7 @@ digit = new Parser (s) ->
   { target, index } = s
   if index >= target.length()
     return s.errorify "ParseError (position #{index}): Expecting digit, got end of input"
-  char = target.elementAt(index)
+  char = target.elementAt index
   return if reDigit.test char then state.update char, index + 1
   else s.errorify "ParseError (position #{index}): Expecting digit, got '#{char}'"
 
