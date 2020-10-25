@@ -131,4 +131,5 @@ describe "Parser Generators", ->
     it "should not parse at end of input", ->
       (regex /^hello/).should.not.parse sps.empty
       (regex /^テスト/).should.not.parse sps.empty
+      # Interestingly this below doesn't accept end of input
       (regex /^/).should.not.parse sps.empty
