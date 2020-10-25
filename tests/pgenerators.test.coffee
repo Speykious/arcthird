@@ -33,14 +33,17 @@ describe "Parser Generators", ->
       (-> char "").should.throw TypeError
       (-> char "ab").should.throw TypeError
       (-> char 10).should.throw TypeError
+      (-> char true).should.throw TypeError
       (-> char ["a"]).should.throw TypeError
       (-> char 'x').should.not.throw()
       (-> char ' ').should.not.throw()
       (-> char '何').should.not.throw()
     it "should parse ASCII characters", ->
       (char 'a').should.parse sps.abc
+      (char 'a').should.haveParseResult sps.abc, 'a'
     it "should parse Unicode characters", ->
       (char '日').should.parse sps.日本語
+      (char '日').should.haveParseResult sps.日本語, '日'
     it "should not parse at end of input", ->
       parser = char 'a'
       target = sps.empty
@@ -49,6 +52,7 @@ describe "Parser Generators", ->
         "ParseError (position 0): Expecting character 'a', got end of input"
     it "should fail when the character received is not the one expected", ->
       (char 'a').should.not.parse sps.xyz
+      (char '本').should.not.parse sps.日本語
 
   describe "str", ->
     
