@@ -22,6 +22,14 @@ describe "tautology", ->
     "tautology".should.equal "tautology"
 
 describe "parser generator: char", ->
+  it "should only accept characters", ->
+    (-> char "").should.throw TypeError
+    (-> char "ab").should.throw TypeError
+    (-> char 10).should.throw TypeError
+    (-> char ["a"]).should.throw TypeError
+    (-> char 'x').should.not.throw()
+    (-> char ' ').should.not.throw()
+    (-> char '何').should.not.throw()
   it "should parse ASCII characters", ->
     (char 'a').should.parse new StringPStream "abc"
   it "should parse Unicode characters", ->
