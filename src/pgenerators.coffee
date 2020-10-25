@@ -13,13 +13,13 @@ char = (c) ->
       throw new TypeError "char expects a StringPStream instance as target, got #{typeof s.target} instead"
     if s.isError then return s
     { index, target } = s
-    if index < target.length()
-      charWidth = target.getCharWidth index
-      if index + charWidth <= target.length()
-        char = target.getUtf8Char index, charWidth
-        return if char is c then s.update c, index + 1
-        else s.errorify "ParseError (position #{index}): Expecting character #{insp c}, got #{insp char}"
-    return s.errorify "ParseError (position #{index}): Expecting character #{insp c}, got end of input"
+    if index >= target.length()
+      return s.errorify "ParseError (position #{index}): Expecting character #{insp c}, got end of input"
+    charWidth = target.getCharWidth index
+    if index + charWidth <= target.length()
+      char = target.getUtf8Char index, charWidth
+      return if char is c then s.update c, index + 1
+      else s.errorify "ParseError (position #{index}): Expecting character #{insp c}, got #{insp char}"
 
 # anyChar :: StringPStream t => Parser t Char d
 anyChar = new Parser (s) ->
@@ -27,12 +27,12 @@ anyChar = new Parser (s) ->
     throw new TypeError "anyChar expects a StringPStream instance as target, got #{typeof s.target} instead"
   if s.isError then return s
   { index, target } = s
-  if index < target.length()
-    charWidth = target.getCharWidth index
-    if index + charWidth <= target.length()
-      char = target.getUtf8Char index, charWidth
-      return s.update char, index + 1
-  return s.errorify "ParseError (position #{index}): Expecting any character, got end of input"
+  if index >= target.length()
+    return s.errorify "ParseError (position #{index}): Expecting any character, got end of input"
+  charWidth = target.getCharWidth index
+  if index + charWidth <= target.length()
+    char = target.getUtf8Char index, charWidth
+    return s.update char, index + 1
 
 # peek :: Parser
 peek = new Parser (s) ->
@@ -84,9 +84,11 @@ digit = new Parser (s) ->
   { target, index } = s
   if index >= target.length()
     return s.errorify "ParseError (position #{index}): Expecting digit, got end of input"
-  char = target.elementAt index
-  return if reDigit.test char then state.update char, index + 1
-  else s.errorify "ParseError (position #{index}): Expecting digit, got '#{char}'"
+  charWidth = target.getCharWidth index
+  if index + charWidth <= target.length()
+    char = target.getUtf8Char index, charWidth
+    return if reDigit.test char then state.update char, index + 1
+    else s.errorify "ParseError (position #{index}): Expecting digit, got '#{char}'"
 
 # digits :: Parser String String d
 digits = (regex reDigits).errorMap ({ index }) ->
