@@ -6,7 +6,7 @@ Parser = require "./Parser"
 
 # char :: StringPStream t => Char -> Parser t Char d
 char = (c) ->
-  unless c and (charlength c) is 1
+  unless c and typeof c is "string" and (charlength c) is 1
     throw new TypeError "char must be called with a single character, got #{insp c} instead"
   return new Parser (s) ->
     unless s.target instanceof StringPStream
@@ -39,7 +39,7 @@ peek = new Parser (s) ->
 
 # str :: StringPStream t => String -> Parser t String d
 str = (xs) ->
-  unless xs and (charlength xs) > 0
+  unless xs and typeof xs is "string" and (charlength xs) > 0
     throw new TypeError "str must be called with a string with length > 0, got #{xs} instead"
   es = encoder.encode xs
   return new Parser (s) ->
