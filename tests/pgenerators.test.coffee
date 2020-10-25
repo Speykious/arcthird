@@ -65,5 +65,5 @@ describe "Parser Generators", ->
       target = sps.empty
       anyChar.should.not.parse target
       anyChar.should.haveParseError target,
-        "ParseError (position 0): Expecting character 'a', got end of input"
+        "ParseError (position 0): Expecting any character, got end of input"
     
