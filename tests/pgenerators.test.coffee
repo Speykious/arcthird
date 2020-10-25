@@ -54,5 +54,16 @@ describe "Parser Generators", ->
       (char 'a').should.not.parse sps.xyz
       (char '本').should.not.parse sps.日本語
 
-  describe "str", ->
+  describe "anyChar", ->
+    it "should parse ASCII characters", ->
+      anyChar.should.parse sps.abc
+      anyChar.should.haveParseResult sps.abc, 'a'
+    it "should parse Unicode characters", ->
+      anyChar.should.parse sps.日本語
+      anyChar.should.haveParseResult sps.日本語, '日'
+    it "should not parse at end of input", ->
+      target = sps.empty
+      anyChar.should.not.parse target
+      anyChar.should.haveParseError target,
+        "ParseError (position 0): Expecting character 'a', got end of input"
     

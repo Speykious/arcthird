@@ -27,8 +27,12 @@ anyChar = new Parser (s) ->
     throw new TypeError "anyChar expects a StringPStream instance as target, got #{typeof s.target} instead"
   if s.isError then return s
   { index, target } = s
-  return if index < target.length() then s.update (target.elementAt index), index + 1
-  else s.errorify "ParseError (position #{index}): Expecting any character, got end of input"
+  if index < target.length()
+    charWidth = target.getCharWidth index
+    if index + charWidth <= target.length()
+      char = target.getUtf8Char index, charWidth
+      return s.update char, index + 1
+  return s.errorify "ParseError (position #{index}): Expecting any character, got end of input"
 
 # peek :: Parser
 peek = new Parser (s) ->
