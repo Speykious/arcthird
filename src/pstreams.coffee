@@ -38,8 +38,9 @@ class StringPStream extends PStream
   elementAt: (i) -> @structure.getUint8 i
   
   getString: (index, length) ->
+    structure = @structure
     bytes = Uint8Array.from { length }, (_, i) ->
-      @structure.getUint8 index + i
+      structure.getUint8 index + i
     return decoder.decode bytes
 
   getUtf8Char: (index, length) ->
