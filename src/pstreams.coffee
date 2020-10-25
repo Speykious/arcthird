@@ -18,7 +18,7 @@ decoder = new text.Decoder()
 
 
 class StringPStream extends PStream
-  constructor: (@target) ->
+  constructor: (target) ->
     dataView = undefined
     if typeof target is "string"
       bytes = encoder.encode target
