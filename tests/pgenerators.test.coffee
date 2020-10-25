@@ -47,9 +47,8 @@ describe "Parser Generators", ->
       (char '日').should.parse sps.日本語
       (char '日').should.haveParseResult sps.日本語, '日'
     it "should not parse at end of input", ->
-      parser = char 'a'
-      parser.should.not.parse sps.empty
-      parser.should.haveParseError sps.empty,
+      (char 'a').should.not.parse sps.empty
+      (char 'a').should.haveParseError sps.empty,
         "ParseError (position 0): Expecting character 'a', got end of input"
     it "should not parse an unexpected character", ->
       (char 'a').should.not.parse sps.xyz
@@ -98,11 +97,38 @@ describe "Parser Generators", ->
       (str "それ").should.parse sps.テスト
       (str "それ").should.haveParseResult sps.テスト, "それ"
     it "should not parse at end of input", ->
-      parser = str "anything here"
-      parser.should.not.parse sps.empty
-      parser.should.haveParseError sps.empty,
+      (str "anything here").should.not.parse sps.empty
+      (str "anything here").should.haveParseError sps.empty,
         "ParseError (position 0): Expecting string 'anything here', got end of input"
     it "should not parse an unexpected string", ->
       (str "hello").should.not.parse sps.abc
       (str "日本語").should.not.parse sps.テスト
-      
+  
+  describe "regex", ->
+    it "should only accept regexs", ->
+      (-> regex "ab").should.throw TypeError
+      (-> regex 123).should.throw TypeError
+      (-> regex true).should.throw TypeError
+      (-> regex ["a"]).should.throw TypeError
+      (-> regex /^ab/).should.not.throw()
+      (-> regex /^/).should.not.throw()
+      (-> regex /^日本/).should.not.throw()
+    it "should reject regexs without '^'", ->
+      (-> regex /xy/).should.throw Error
+      (-> regex /テスト/).should.throw Error
+      (-> regex /^xy/).should.not.throw()
+    it "should parse ASCII matches", ->
+      (regex /^hello/).should.parse sps.hello
+      (regex /^hello/).should.haveParseResult sps.hello, "hello"
+      (regex /^\w+\sworld/).should.parse sps.hello
+      (regex /^\w+\sworld/).should.haveParseResult sps.hello, "hello world"
+    it "should parse Unicode matches", ->
+      # Note: Unicode and regular expressions don't really work well together...
+      (regex /^それ/).should.parse sps.テスト
+      (regex /^それ/).should.haveParseResult sps.テスト, "それ"
+      (regex /^それはテスト/).should.parse sps.テスト
+      (regex /^それはテスト/).should.haveParseResult sps.テスト, "それはテスト"
+    it "should not parse at end of input", ->
+      (regex /^hello/).should.not.parse sps.empty
+      (regex /^テスト/).should.not.parse sps.empty
+      (regex /^/).should.not.parse sps.empty
