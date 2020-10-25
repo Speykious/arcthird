@@ -44,6 +44,9 @@ tap = (f) ->
 # parse :: PStream t => Parser t a d -> t -> Either String a
 parse = (parser) -> parser.parse
 
+# strparse :: StringPStream t => Parser t a d -> String -> Either String a
+strparse = (parser) -> (s) -> parser.parse new StringPStream s
+
 # decide :: PStream t => (a -> Parser t b d) -> Parser t b d
 decide = (f) ->
   new Parser (s) ->
@@ -336,9 +339,9 @@ toValue = (s) ->
 
 module.exports = {
   getData, setData, mapData, withData
-  pipe, compose, tap, parse, decide, fail
-  succeedWith, either, coroutine
-  exactly, many, atLeast, atLeast1
+  pipe, compose, tap, parse, strparse
+  decide, fail, succeedWith, either
+  coroutine, exactly, many, atLeast, atLeast1
   mapTo, errorMapTo
   namedSequenceOf, sequenceOf
   sepBy, sepBy1, choice, between
