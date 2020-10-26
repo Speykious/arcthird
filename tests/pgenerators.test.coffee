@@ -16,14 +16,16 @@ Parser = require "../src/Parser"
 } = require "../src/pgenerators"
 
 sps =
-  a:     new StringPStream "a"
-  abc:   new StringPStream "abc"
-  xyz:   new StringPStream "xyz"
-  nums:  new StringPStream "123456"
-  hello: new StringPStream "hello world"
-  empty: new StringPStream ""
-  日本語: new StringPStream "日本語"
-  テスト: new StringPStream "それはテストです。"
+  a:        new StringPStream "a"
+  abc:      new StringPStream "abc"
+  xyz:      new StringPStream "xyz"
+  nums:     new StringPStream "123456"
+  numalphs: new StringPStream "123abc"
+  alphnums: new StringPStream "abc123"
+  hello:    new StringPStream "hello world"
+  empty:    new StringPStream ""
+  日本語:    new StringPStream "日本語"
+  テスト:    new StringPStream "それはテストです。"
 
 
 describe "tautology", ->
@@ -150,3 +152,75 @@ describe "Parser Generators", ->
       digit.should.not.parse sps.empty
       digit.should.haveParseError sps.empty,
         "ParseError (position 0): Expecting digit, got end of input"
+  
+  describe "digits", ->
+    it "should parse digits", ->
+      digits.should.parse sps.nums
+      digits.should.haveParseResult sps.nums, "123456"
+      digits.should.parse sps.numalphs
+      digits.should.haveParseResult sps.numalphs, "123"
+    it "should not parse non-digit characters", ->
+      digits.should.not.parse sps.abc
+      digits.should.haveParseError sps.abc,
+        "ParseError (position 0): Expecting digits"
+      digits.should.not.parse sps.日本語
+      digits.should.haveParseError sps.日本語,
+        "ParseError (position 0): Expecting digits"
+    it "should not parse at end of input", ->
+      digits.should.not.parse sps.empty
+      digits.should.haveParseError sps.empty,
+        "ParseError (position 0): Expecting digits"
+  
+  describe "letter", ->
+    it "should parse letters", ->
+      letter.should.parse sps.abc
+      letter.should.haveParseResult sps.abc, 'a'
+    it "should not parse non-digit characters", ->
+      letter.should.not.parse sps.nums
+      letter.should.haveParseError sps.nums,
+        "ParseError (position 0): Expecting letter, got '1'"
+    it "should not parse at end of input", ->
+      letter.should.not.parse sps.empty
+      letter.should.haveParseError sps.empty,
+        "ParseError (position 0): Expecting letter, got end of input"
+  
+  describe "letters", ->
+    it "should parse letters", ->
+      letters.should.parse sps.abc
+      letters.should.haveParseResult sps.abc, "abc"
+      letters.should.parse sps.alphnums
+      letters.should.haveParseResult sps.alphnums, "abc"
+    it "should not parse non-letter characters", ->
+      letters.should.not.parse sps.nums
+      letters.should.haveParseError sps.nums,
+        "ParseError (position 0): Expecting letters"
+    it "should not parse at end of input", ->
+      letters.should.not.parse sps.empty
+      letters.should.haveParseError sps.empty,
+        "ParseError (position 0): Expecting letters"
+  
+  describe "anyOfString", ->
+    it "should only accept non-empty strings", ->
+      (-> anyOfString "").should.throw TypeError
+      (-> anyOfString 10).should.throw TypeError
+      (-> anyOfString true).should.throw TypeError
+      (-> anyOfString ["a"]).should.throw TypeError
+      (-> anyOfString "x").should.not.throw()
+      (-> anyOfString " \n").should.not.throw()
+      (-> anyOfString "ab").should.not.throw()
+      (-> anyOfString "何").should.not.throw()
+      (-> anyOfString "テストです").should.not.throw()
+    it "should parse ASCII strings", ->
+      (anyOfString "oleh").should.parse sps.hello
+      (anyOfString "oleh").should.haveParseResult sps.hello, 'h'
+    it "should parse Unicode strings", ->
+      (anyOfString "あれそ").should.parse sps.テスト
+      (anyOfString "あれそ").should.haveParseResult sps.テスト, 'そ'
+    it "should not parse at end of input", ->
+      (anyOfString "simp").should.not.parse sps.empty
+      (anyOfString "simp").should.haveParseError sps.empty,
+        "ParseError (position 0): Expecting any of the string 'simp', got end of input"
+    it "should not parse an unexpected string", ->
+      (anyOfString "qwerty").should.not.parse sps.abc
+      (anyOfString "あいうえ").should.not.parse sps.テスト
+  
