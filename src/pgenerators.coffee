@@ -87,7 +87,7 @@ digit = new Parser (s) ->
   charWidth = target.getCharWidth index
   if index + charWidth <= target.length()
     char = target.getUtf8Char index, charWidth
-    return if reDigit.test char then state.update char, index + 1
+    return if reDigit.test char then s.update char, index + 1
     else s.errorify "ParseError (position #{index}): Expecting digit, got '#{char}'"
 
 # digits :: Parser String String d
