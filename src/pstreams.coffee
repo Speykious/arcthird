@@ -35,14 +35,18 @@ class StringPStream extends PStream
     super dataView
   
   length: -> @structure.byteLength
-  elementAt: (i) -> @structure.getUint8 i
+  elementAt: (i) ->
+    try
+      @structure.getUint8 i
+    catch e
+      null
   
   getString: (index, length) ->
     structure = @structure
     bytes = Uint8Array.from { length }, (_, i) ->
       structure.getUint8 index + i
     return decoder.decode bytes
-
+  
   getUtf8Char: (index, length) ->
     dvs = @structure
     bytes = Uint8Array.from { length }, (_, i) ->
@@ -50,7 +54,8 @@ class StringPStream extends PStream
     return decoder.decode bytes
   
   getCharWidth: (index) ->
-    byte = @structure.getUint8 index
+    byte = @elementAt index
+    if byte is null then return 0
     return if (byte & 0x80) >> 7 is 0 then 1
     else if (byte & 0xe0) >> 5 is 0b110 then 2
     else if (byte & 0xf0) >> 4 is 0b1110 then 3
