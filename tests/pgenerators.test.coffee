@@ -5,7 +5,8 @@ chai = require "chai"
 chai.should()
 chai.use models.parse
 
-Parser = require "../src/Parser"
+Parser      = require "../src/Parser"
+ParserState = require "../src/ParserState"
 { StringPStream } = require "../src/pstreams"
 {
   char, anyChar, peek, str
@@ -224,3 +225,21 @@ describe "Parser Generators", ->
       (anyOfString "qwerty").should.not.parse sps.abc
       (anyOfString "あいうえ").should.not.parse sps.テスト
   
+  describe "endOfInput", ->
+    it "should parse at end of input", ->
+      endOfInput.should.parse sps.empty
+      endOfInput.should.haveParseResult sps.empty, null
+    it "should not parse any input", ->
+      endOfInput.should.not.parse sps.abc
+      endOfInput.should.not.parse sps.nums
+      endOfInput.should.not.parse sps.numalphs
+      endOfInput.should.not.parse sps.日本語
+      endOfInput.should.not.parse sps.テスト
+    it "passes check 42 (yeet)", ->
+      state = new ParserState {
+        target: new StringPStream "42"
+        index: 1
+      }
+      (endOfInput.pf state).isError.should.be.true
+      state.index = 2
+      (endOfInput.pf state).isError.should.be.false
