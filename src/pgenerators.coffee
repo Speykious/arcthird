@@ -147,7 +147,7 @@ whitespace = (regex reWhitespaces).errorMap ({ index }) ->
   "ParseError 'whitespace' (position #{index}): Expecting to match at least one space"
 
 # optionalWhitespace :: StringPStream t => Parser t String d
-optionalWhitespace = (possibly whitespace).map (x) -> x or ''
+optionalWhitespace = (possibly whitespace).map (x) -> x or ""
 
 module.exports = {
   char, anyChar, peek, str
