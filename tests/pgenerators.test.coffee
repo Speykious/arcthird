@@ -19,6 +19,7 @@ sps =
   a:     new StringPStream "a"
   abc:   new StringPStream "abc"
   xyz:   new StringPStream "xyz"
+  nums:  new StringPStream "123456"
   hello: new StringPStream "hello world"
   empty: new StringPStream ""
   日本語: new StringPStream "日本語"
@@ -133,3 +134,19 @@ describe "Parser Generators", ->
       (regex /^テスト/).should.not.parse sps.empty
       # Interestingly this below doesn't accept end of input
       (regex /^/).should.not.parse sps.empty
+  
+  describe "digit", ->
+    it "should parse digits", ->
+      digit.should.parse sps.nums
+      digit.should.haveParseResult sps.nums, "1"
+    it "should not parse non-digit characters", ->
+      digit.should.not.parse sps.abc
+      digit.should.haveParseError sps.abc,
+        "ParseError (position 0): Expecting digit, got 'a'"
+      digit.should.not.parse sps.日本語
+      digit.should.haveParseError sps.日本語,
+        "ParseError (position 0): Expecting digit, got '日'"
+    it "should not parse at end of input", ->
+      digit.should.not.parse sps.empty
+      digit.should.haveParseError sps.empty,
+        "ParseError (position 0): Expecting digit, got end of input"
