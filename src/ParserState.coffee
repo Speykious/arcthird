@@ -9,7 +9,7 @@ class ParserState
     @error   = props.error   or null
     @isError = props.isError or false
     @index   = props.index   or 0
-    @result  = props.result  or null
+    @result  = props.result
   
   props: -> ({
     target:  @target
