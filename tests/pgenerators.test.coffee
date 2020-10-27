@@ -24,6 +24,7 @@ sps =
   numalphs: new StringPStream "123abc"
   alphnums: new StringPStream "abc123"
   hello:    new StringPStream "hello world"
+  spaces:   new StringPStream "   hmmm"
   empty:    new StringPStream ""
   日本語:    new StringPStream "日本語"
   テスト:    new StringPStream "それはテストです。"
@@ -243,3 +244,36 @@ describe "Parser Generators", ->
       (endOfInput.pf state).isError.should.be.true
       state.index = 2
       (endOfInput.pf state).isError.should.be.false
+  
+  describe "whitespace", ->
+    it "should parse whitespaces", ->
+      whitespace.should.parse sps.spaces
+      whitespace.should.haveParseResult sps.spaces, "   "
+    it "should not parse non-whitespaces", ->
+      whitespace.should.not.parse sps.abc
+      whitespace.should.not.parse sps.nums
+      whitespace.should.not.parse sps.numalphs
+      whitespace.should.not.parse sps.日本語
+      whitespace.should.not.parse sps.テスト
+    it "should not parse at end of input", ->
+      whitespace.should.not.parse sps.empty
+  
+  describe "optionalWhitespace", ->
+    it "should parse whitespaces", ->
+      optionalWhitespace.should.parse sps.spaces
+      optionalWhitespace.should.haveParseResult sps.spaces, "   "
+    it "should also parse non-whitespaces", ->
+      optionalWhitespace.should.parse sps.abc
+      optionalWhitespace.should.parse sps.nums
+      optionalWhitespace.should.parse sps.numalphs
+      optionalWhitespace.should.parse sps.日本語
+      optionalWhitespace.should.parse sps.テスト
+      optionalWhitespace.should.haveParseResult sps.abc, ""
+      optionalWhitespace.should.haveParseResult sps.nums, ""
+      optionalWhitespace.should.haveParseResult sps.numalphs, ""
+      optionalWhitespace.should.haveParseResult sps.日本語, ""
+      optionalWhitespace.should.haveParseResult sps.テスト, ""
+    it "should also parse at end of input", ->
+      optionalWhitespace.should.parse sps.empty
+      optionalWhitespace.should.haveParseResult sps.empty, ""
+      
