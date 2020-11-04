@@ -66,3 +66,17 @@ module.exports = (chai, utils) ->
       reError.toString()
       state.error
     )
+  
+  strings = [
+    "hello world",
+    "hello1234a",
+    "",
+    "12345 325vfs43",
+    "!@#$%^",
+    "≈ç√∫˜µ hgello skajb",
+  ]
+  
+  Assertion.addMethod "parseLike", (parser) ->
+    obj = this._obj
+    strings.forEarch s -> (obj.parse s).should.equal parser.parse s
+  
