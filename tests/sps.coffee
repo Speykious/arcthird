@@ -1,3 +1,5 @@
+{ StringPStream } = require "../src/pstreams"
+
 module.exports =
   a:        new StringPStream "a"
   abc:      new StringPStream "abc"
