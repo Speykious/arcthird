@@ -3,6 +3,7 @@ Parser = require "../../src/Parser"
 
 module.exports = (chai, utils) ->
   Assertion = chai.Assertion
+  jsonify = JSON.stringify
   
   Assertion.addMethod "parse", (target) ->
     obj = this._obj
@@ -18,7 +19,7 @@ module.exports = (chai, utils) ->
     obj = this._obj
     state = obj.parse target
     this.assert(
-      state.result is result
+      (jsonify state.result) is (jsonify result)
       "expected parsed result to be \#{exp}, got \#{act}"
       "expected parsed result not to be \#{act}"
       result
@@ -29,7 +30,7 @@ module.exports = (chai, utils) ->
     obj = this._obj
     state = obj.parse target
     this.assert(
-      state.data is data
+      (jsonify state.data) is (jsonify data)
       "expected parser data to be \#{exp}, got \#{act}"
       "expected parser data not to be \#{act}"
       data
