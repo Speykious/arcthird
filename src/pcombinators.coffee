@@ -4,14 +4,14 @@ Parser                     = require "./Parser"
 
 # getData :: PStream t => Parser t a d
 getData = new Parser (s) ->
-  return if sisEerror then s
+  return if s.isError then s
   else s.resultify s.data
 
 # setData :: PStream t => d -> Parser t a d
 setData = (d) ->
   new Parser (s) ->
     return if s.isError then s
-    else state.dataify d
+    else s.dataify d
 
 # mapData :: PStream t => (d -> e) -> Parser t a e
 mapData = (f) ->
