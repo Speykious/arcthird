@@ -24,6 +24,17 @@ module.exports = (chai, utils) ->
       result
       state.result
     )
+
+  Assertion.addMethod "haveParseData", (target, data) ->
+    obj = this._obj
+    state = obj.parse target
+    this.assert(
+      state.data is data
+      "expected parser data to be \#{exp}, got \#{act}"
+      "expected parser data not to be \#{act}"
+      data
+      state.data
+    )
   
   Assertion.addMethod "haveParserState", (target, filter) ->
     obj = this._obj
