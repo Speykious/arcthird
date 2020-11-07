@@ -44,3 +44,14 @@ describe "Parser Combinators", ->
     it "should set data even when PStream is empty", ->
       parser.should.haveParseResult sps.empty, 42
       parser.should.haveParseData sps.empty, "new data"
+  
+  describe "mapData", ->
+    p = withData coroutine () ->
+      yield mapData (d) -> d.map (x) -> x * 2
+      return 42
+    it "should map data on the parser", ->
+      (p [1, 2, 3]).should.haveParseResult sps.abc, 42
+      (p [1, 2, 3]).should.haveParseData sps.abc, [2, 4, 6]
+    it "should map data even when PStream is empty", ->
+      (p [1, 2, 3]).should.haveParseResult sps.empty, 42
+      (p [1, 2, 3]).should.haveParseData sps.empty, [2, 4, 6]
