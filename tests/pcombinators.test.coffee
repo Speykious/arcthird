@@ -120,5 +120,10 @@ describe "Parser Combinators", ->
       (expect state.result).to.be.undefined
       state.isError.should.be.true
       state.error.should.equal "ParseError (position 0): Expecting character 'a', got 'x'"
-
+  
+  describe "parse", ->
+    it "should act like the .parse property", ->
+      ((parse char 'a') sps.abc).props.should.equal ((char 'a').parse sps.abc).props
+    it "doesn't have anything else interesting", ->
+      true.should.not.be.false
 

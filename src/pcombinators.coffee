@@ -42,7 +42,7 @@ tap = (f) ->
     return s
 
 # parse :: PStream t => Parser t a d -> t -> Either String a
-parse = (parser) -> parser.parse
+parse = (parser) -> (target) -> parser.parse target
 
 # strparse :: StringPStream t => Parser t a d -> String -> Either String a
 strparse = (parser) -> (s) -> parser.parse new StringPStream s

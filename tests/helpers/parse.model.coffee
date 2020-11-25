@@ -90,5 +90,5 @@ module.exports = (chai, utils) ->
   
   Assertion.addMethod "parseLike", (parser) ->
     obj = this._obj
-    strings.forEarch s -> (obj.parse s).should.equal parser.parse s
+    strings.forEarch s -> (obj.parse s).props.should.equal (parser.parse s).props
   
