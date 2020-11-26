@@ -146,4 +146,21 @@ describe "Parser Combinators", ->
     it "should not decide the wrong thing", ->
       parser.should.not.parse sps.xyz
       parser.should.haveParseError sps.xyz, "nope"
+  
+  describe "fail", ->
+    it "fails successfully", ->
+      (fail "task failed successfully").should.not.parse sps.hello
+    it "generates the right error", ->
+      (fail "task failed successfully").should.haveParseError sps.hello, "task failed successfully"
+  
+  describe "succeedWith", ->
+    it "should parse anything", ->
+      (succeedWith "a career").should.parse sps.abc
+      (succeedWith "a career").should.parse sps.テスト
+    it "should parse nothing", ->
+      (succeedWith "nothing").should.parse sps.empty
+    it "should actually succeed with the value", ->
+      (succeedWith "a career").should.haveParseResult sps.abc, "a career"
+      (succeedWith "nothing").should.haveParseResult sps.empty, "nothing"
+  
 
