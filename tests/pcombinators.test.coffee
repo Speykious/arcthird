@@ -22,7 +22,7 @@ ParserState = require "../src/ParserState"
   recursiveParser, takeRight, takeLeft
   toPromise, toValue
 } = require "../src/pcombinators"
-{ digits, str, char } = require "../src/pgenerators"
+{ digits, str, char, letters } = require "../src/pgenerators"
 
 sps = require "./sps"
 
@@ -126,4 +126,24 @@ describe "Parser Combinators", ->
       ((parse char 'a') sps.abc).props.should.equal ((char 'a').parse sps.abc).props
     it "doesn't have anything else interesting", ->
       true.should.not.be.false
+  
+  describe "strparse", ->
+    it "should just work", ->
+      ((strparse char 'a') "abc").props.should.equal ((char 'a').parse sps.abc).props
+  
+  describe "decide", ->
+    df = (res) -> switch res
+      when "abc" then digits
+      when "hello" then str " world"
+      else fail "nope"
+    parser = pipe [letters, decide df]
+    it "should decide the right thing (1)", ->
+      parser.should.parse sps.alphnums
+      parser.should.haveParseResult sps.alphnums, "123"
+    it "should decide the right thing (2)", ->
+      parser.should.parse sps.hello
+      parser.should.haveParseResult sps.hello, " world"
+    it "should not decide the wrong thing", ->
+      parser.should.not.parse sps.xyz
+      parser.should.haveParseError sps.xyz, "nope"
 
