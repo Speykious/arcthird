@@ -203,7 +203,7 @@ describe "Parser Combinators", ->
       ((exactly 3) letter).should.not.parse sps.numalphs
     it "should fail at end of input", ->
       ((exactly 4) letter).should.not.parse sps.abc
-    it "should not accept 0", ->
+    it "should only accept a number > 0", ->
       (-> exactly 0).should.throw TypeError
       (-> exactly 'a').should.throw TypeError
 
