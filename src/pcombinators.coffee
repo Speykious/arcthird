@@ -69,6 +69,7 @@ either = (parser) ->
     state = parser.pf s
     { error } = state
     state.error = null
+    state.isError = false
     return state.resultify (error or state.result)
 
 # coroutine :: PStream t => (() -> Iterator (Parser t a d)) -> Parser t a d

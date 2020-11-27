@@ -163,4 +163,16 @@ describe "Parser Combinators", ->
       (succeedWith "a career").should.haveParseResult sps.abc, "a career"
       (succeedWith "nothing").should.haveParseResult sps.empty, "nothing"
   
-
+  describe "either", ->
+    it "should work when it works", ->
+      (either char 'a').should.parse sps.abc
+      (either char 'a').should.parse sps.alphnums
+    it "should work when it fails", ->
+      (either char 'a').should.parse sps.xyz
+      (either char 'a').should.parse sps.テスト
+      (either char 'a').should.parse sps.empty
+      (either fail "nope").should.parse sps.hello
+      (either fail "nope").should.parse sps.empty
+  
+  
+  
