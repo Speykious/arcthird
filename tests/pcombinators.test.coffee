@@ -22,7 +22,7 @@ ParserState = require "../src/ParserState"
   recursiveParser, takeRight, takeLeft
   toPromise, toValue
 } = require "../src/pcombinators"
-{ digits, str, char, letters } = require "../src/pgenerators"
+{ digits, str, char, letter, letters } = require "../src/pgenerators"
 
 sps = require "./sps"
 
@@ -174,5 +174,36 @@ describe "Parser Combinators", ->
       (either fail "nope").should.parse sps.hello
       (either fail "nope").should.parse sps.empty
   
+  describe "coroutine", ->
+    parser = coroutine () ->
+      part1 = yield letters
+      part2 = yield digits
+      return [part1, part2]
+    it "should correctly use yielded parsers", ->
+      parser.should.parse sps.alphnums
+      parser.should.haveParseResult sps.alphnums, ["abc", "123"]
+    it "should not be stateful on second usage", ->
+      parser.should.parse sps.xyphnums
+      parser.should.haveParseResult sps.xyphnums, ["xyz", "987"]
+    it "should show the correct error", ->
+      parser.should.not.parse sps.abc
+      parser.should.haveParseError sps.abc, "ParseError (position 3): Expecting digits"
+    it "should only accept parsers as yielded values", ->
+      fakeParser = coroutine () ->
+        part1 = yield letters
+        part2 = yield 42
+        return [part1, part2]
+      (-> fakeParser.parse sps.alphnums).should.throw Error
+      (-> fakeParser.parse sps.alphnums).should.throw "[coroutine] yielded values must be Parsers, got 42."
   
-  
+  describe "exactly", ->
+    it "should work exactly as expected", ->
+      ((exactly 3) letter).should.haveParseResult sps.abc, ['a', 'b', 'c']
+    it "should fail exactly as expected", ->
+      ((exactly 3) letter).should.not.parse sps.numalphs
+    it "should fail at end of input", ->
+      ((exactly 4) letter).should.not.parse sps.abc
+    it "should not accept 0", ->
+      (-> exactly 0).should.throw TypeError
+      (-> exactly 'a').should.throw TypeError
+
