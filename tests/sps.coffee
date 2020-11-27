@@ -7,6 +7,7 @@ module.exports =
   nums:     new StringPStream "123456"
   numalphs: new StringPStream "123abc"
   alphnums: new StringPStream "abc123"
+  xyphnums: new StringPStream "xyz987"
   hello:    new StringPStream "hello world"
   spaces:   new StringPStream "   hmmm"
   empty:    new StringPStream ""
