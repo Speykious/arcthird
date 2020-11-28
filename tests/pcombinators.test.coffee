@@ -22,7 +22,7 @@ ParserState = require "../src/ParserState"
   recursiveParser, takeRight, takeLeft
   toPromise, toValue
 } = require "../src/pcombinators"
-{ digits, str, char, letter, letters } = require "../src/pgenerators"
+{ digit, digits, str, char, letter, letters } = require "../src/pgenerators"
 
 sps = require "./sps"
 
@@ -206,4 +206,22 @@ describe "Parser Combinators", ->
     it "should only accept a number > 0", ->
       (-> exactly 0).should.throw TypeError
       (-> exactly 'a').should.throw TypeError
-
+  
+  describe "many", ->
+    it "should parse many things", ->
+      (many digit).should.haveParseResult sps.numalphs, ['1', '2', '3']
+      (many digit).should.haveParseResult sps.nums, ['1', '2', '3', '4', '5', '6']
+    it "should not fail when nothing is parsed", ->
+      (many digit).should.haveParseResult sps.abc, []
+  
+  describe "atLeast", ->
+    it "should parse at least x things", ->
+      ((atLeast 2) digit).should.haveParseResult sps.numalphs, ['1', '2', '3']
+      ((atLeast 1) digit).should.haveParseResult sps.nums, ['1', '2', '3', '4', '5', '6']
+    it "should not fail when nothing is parsed for at least 0", ->
+      ((atLeast 0) digit).should.haveParseResult sps.abc, []
+    it "should fail when there aren't enough parsed results", ->
+      ((atLeast 4) digit).should.not.parse sps.numalphs
+      ((atLeast 1) digit).should.not.parse sps.abc
+      
+  

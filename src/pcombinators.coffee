@@ -113,7 +113,7 @@ many = (parser) ->
     loop
       s = parser.pf s
       if s.isError then break
-      results.push s
+      results.push s.result
       { target, index } = s
       if target.length() and index >= target.length() then break
     return s.resultify results
