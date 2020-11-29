@@ -264,5 +264,4 @@ describe "Parser Combinators", ->
         numbers: "123"
       }
     it "should fail like sequenceOf but named", ->
-      console.log parser.parse sps.abc
       parser.should.not.parse sps.abc
