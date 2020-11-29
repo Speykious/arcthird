@@ -22,7 +22,12 @@ ParserState = require "../src/ParserState"
   recursiveParser, takeRight, takeLeft
   toPromise, toValue
 } = require "../src/pcombinators"
-{ digit, digits, str, char, letter, letters } = require "../src/pgenerators"
+{
+  digit, digits, letter, letters
+  str, char, whitespace
+} = require "../src/pgenerators"
+
+join = (s) -> (l) -> l.join s
 
 sps = require "./sps"
 
@@ -223,5 +228,41 @@ describe "Parser Combinators", ->
     it "should fail when there aren't enough parsed results", ->
       ((atLeast 4) digit).should.not.parse sps.numalphs
       ((atLeast 1) digit).should.not.parse sps.abc
-      
   
+  describe "atLeast1", ->
+    it "should parse at least 1 thing", ->
+      (atLeast1 digit).should.haveParseResult sps.numalphs, ['1', '2', '3']
+      (atLeast1 digit).should.haveParseResult sps.nums, ['1', '2', '3', '4', '5', '6']
+    it "should fail when there isn't at least 1 parsed result", ->
+      (atLeast1 digit).should.not.parse sps.abc
+
+  describe "mapTo", ->
+    parser = pipe [(char 'a'), mapTo (x) -> ({ letter: x })]
+    it "should map correctly", ->
+      parser.should.haveParseResult sps.abc, { letter: 'a' }
+      (mapTo (x) -> "bruh").should.haveParseResult sps.empty, "bruh"
+  
+  describe "errorMapTo", ->
+    parser = pipe [
+      choice [ sequenceOf [whitespace, letters]
+               sequenceOf [letters, digits] ]
+      errorMapTo ({ index }) -> "Failed to parse structure @ #{index}"
+    ]
+    it "shouldn't change the behavior of the parser", ->
+      parser.should.parse sps.spaces
+      parser.should.parse sps.alphnums
+    it "should give the mapped error", ->
+      parser.should.not.parse sps.abc
+      parser.should.haveParseError sps.abc, "Failed to parse structure @ 3"
+  
+  describe "namedSequenceOf", ->
+    parser = namedSequenceOf [ ["letters", letters]
+                               ["numbers", digits] ]
+    it "should parse like sequenceOf but named", ->
+      parser.should.haveParseResult sps.alphnums, {
+        letters: "abc"
+        numbers: "123"
+      }
+    it "should fail like sequenceOf but named", ->
+      console.log parser.parse sps.abc
+      parser.should.not.parse sps.abc

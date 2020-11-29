@@ -146,7 +146,7 @@ namedSequenceOf = (pairedParsers) ->
   new Parser (s) ->
     if s.isError then return s
     results = {}
-    for key, parser of pairedParsers
+    for [key, parser] in pairedParsers
       out = parser.pf s
       if out.isError then return out
       else
