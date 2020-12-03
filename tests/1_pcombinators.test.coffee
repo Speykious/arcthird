@@ -15,6 +15,7 @@ ParserState = require "../src/ParserState"
   coroutine, exactly, many, atLeast, atLeast1
   mapTo, errorMapTo
   namedSequenceOf, sequenceOf
+  # Marker of things left to do
   sepBy, sepBy1, choice, between
   everythingUntil, everyCharUntil
   anythingExcept, anyCharExcept
@@ -265,3 +266,15 @@ describe "Parser Combinators", ->
       }
     it "should fail like sequenceOf but named", ->
       parser.should.not.parse sps.abc
+  
+  describe "sequenceOf", ->
+    parser = sequenceOf [letters, digits]
+    it "should parse like a sequence of parsers", ->
+      parser.should.haveParseResult sps.alphnums, ["abc", "123"]
+    it "should fail when one of them fail", ->
+      parser.should.not.parse sps.abc
+      parser.should.haveParseError sps.abc, "ParseError (position 3): Expecting digits"
+  
+  describe "sepBy", ->
+    it "should correctly separate input", ->
+      ((sepBy char ',') letter).should.haveParseResult "a,b,c", ['a', 'b', 'c']

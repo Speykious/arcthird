@@ -1,5 +1,6 @@
 # { inspect } = require "util"
 Parser = require "../../src/Parser"
+{ strparse } = require "../../src/pcombinators"
 
 module.exports = (chai, utils) ->
   Assertion = chai.Assertion
@@ -7,17 +8,23 @@ module.exports = (chai, utils) ->
   
   Assertion.addMethod "parse", (target) ->
     obj = this._obj
-    state = obj.parse target
+    state = undefined
+    if typeof target is "string"
+      state = (strparse obj) target
+    else state = obj.parse target
     parsed = utils.inspect target, false, 4
     this.assert(
       state.isError is false
       "expected parser to parse #{parsed}"
       "expected parser not to parse #{parsed}"
     )
-  
+
   Assertion.addMethod "haveParseResult", (target, result) ->
     obj = this._obj
-    state = obj.parse target
+    state = undefined
+    if typeof target is "string"
+      state = (strparse obj) target
+    else state = obj.parse target
     this.assert(
       (jsonify state.result) is (jsonify result)
       "expected parsed result to be \#{exp}, got \#{act}"
@@ -28,7 +35,10 @@ module.exports = (chai, utils) ->
 
   Assertion.addMethod "haveParseData", (target, data) ->
     obj = this._obj
-    state = obj.parse target
+    state = undefined
+    if typeof target is "string"
+      state = (strparse obj) target
+    else state = obj.parse target
     this.assert(
       (jsonify state.data) is (jsonify data)
       "expected parser data to be \#{exp}, got \#{act}"
@@ -39,7 +49,10 @@ module.exports = (chai, utils) ->
   
   Assertion.addMethod "haveParserState", (target, filter) ->
     obj = this._obj
-    state = obj.parse target
+    state = undefined
+    if typeof target is "string"
+      state = (strparse obj) target
+    else state = obj.parse target
     this.assert(
       (filter state) is true
       "expected parser state to pass filter"
@@ -48,7 +61,10 @@ module.exports = (chai, utils) ->
   
   Assertion.addMethod "haveParseResultLike", (target, reResult) ->
     obj = this._obj
-    state = obj.parse target
+    state = undefined
+    if typeof target is "string"
+      state = (strparse obj) target
+    else state = obj.parse target
     this.assert(
       reResult.test state.result
       "expected parsed result to match \#{exp}, got \#{act}"
@@ -59,7 +75,10 @@ module.exports = (chai, utils) ->
 
   Assertion.addMethod "haveParseError", (target, error) ->
     obj = this._obj
-    state = obj.parse target
+    state = undefined
+    if typeof target is "string"
+      state = (strparse obj) target
+    else state = obj.parse target
     this.assert(
       state.error is error
       "expected parser to have error \#{exp}, got \#{act}"
@@ -70,7 +89,10 @@ module.exports = (chai, utils) ->
   
   Assertion.addMethod "haveParseErrorLike", (target, reError) ->
     obj = this._obj
-    state = obj.parse target
+    state = undefined
+    if typeof target is "string"
+      state = (strparse obj) target
+    else state = obj.parse target
     this.assert(
       reError.test state.error
       "expected parser to have error matching \#{exp}, got \#{act}"
@@ -90,5 +112,5 @@ module.exports = (chai, utils) ->
   
   Assertion.addMethod "parseLike", (parser) ->
     obj = this._obj
-    strings.forEarch s -> (obj.parse s).props.should.equal (parser.parse s).props
+    strings.forEarch s -> ((strparse obj) s).props.should.equal ((strparse parser) s).props
   
