@@ -16,8 +16,6 @@ ParserState = require "../src/ParserState"
   whitespace, optionalWhitespace
 } = require "../src/pgenerators"
 
-sps = require "./sps"
-
 describe "tautology", ->
   it "should be a tautology", ->
     "tautology".should.equal "tautology"
@@ -34,42 +32,42 @@ describe "Parser Generators", ->
       (-> char ' ').should.not.throw()
       (-> char '何').should.not.throw()
     it "should parse ASCII characters", ->
-      (char 'a').should.parse sps.abc
-      (char 'a').should.haveParseResult sps.abc, 'a'
+      (char 'a').should.parse "abc"
+      (char 'a').should.haveParseResult "abc", 'a'
     it "should parse Unicode characters", ->
-      (char '日').should.parse sps.日本語
-      (char '日').should.haveParseResult sps.日本語, '日'
+      (char '日').should.parse "日本語"
+      (char '日').should.haveParseResult "日本語", '日'
     it "should not parse at end of input", ->
-      (char 'a').should.not.parse sps.empty
-      (char 'a').should.haveParseError sps.empty,
+      (char 'a').should.not.parse ""
+      (char 'a').should.haveParseError "",
         "ParseError (position 0): Expecting character 'a', got end of input"
     it "should not parse an unexpected character", ->
-      (char 'a').should.not.parse sps.xyz
-      (char '本').should.not.parse sps.日本語
+      (char 'a').should.not.parse "xyz"
+      (char '本').should.not.parse "日本語"
 
   describe "anyChar", ->
     it "should parse ASCII characters", ->
-      anyChar.should.parse sps.abc
-      anyChar.should.haveParseResult sps.abc, 'a'
+      anyChar.should.parse "abc"
+      anyChar.should.haveParseResult "abc", 'a'
     it "should parse Unicode characters", ->
-      anyChar.should.parse sps.日本語
-      anyChar.should.haveParseResult sps.日本語, '日'
+      anyChar.should.parse "日本語"
+      anyChar.should.haveParseResult "日本語", '日'
     it "should not parse at end of input", ->
-      anyChar.should.not.parse sps.empty
-      anyChar.should.haveParseError sps.empty,
+      anyChar.should.not.parse ""
+      anyChar.should.haveParseError "",
         "ParseError (position 0): Expecting any character, got end of input"
   
   describe "peek", ->
     it "should peek non-empty strings", ->
-      for stream in [sps.a, sps.abc, sps.xyz, sps.日本語]
+      for stream in ["a", "abc", "xyz", "日本語"]
         peek.should.parse stream
-        peek.should.haveParseResult stream, stream.elementAt 0
+        peek.should.haveParseResult stream, Buffer.from(stream)[0]
     it "should not peek at end of input", ->
-      peek.should.not.parse sps.empty
-      peek.should.haveParseError sps.empty,
+      peek.should.not.parse ""
+      peek.should.haveParseError "",
         "ParseError (position 0): Unexpected end of input"
     it "should not change the index", ->
-      for stream in [sps.a, sps.abc, sps.xyz, sps.日本語]
+      for stream in ["a", "abc", "xyz", "日本語"]
         peek.should.haveParserState stream, ({ index }) -> index is 0
   
   describe "str", ->
@@ -84,18 +82,18 @@ describe "Parser Generators", ->
       (-> str "何").should.not.throw()
       (-> str "テストです").should.not.throw()
     it "should parse ASCII strings", ->
-      (str "hello").should.parse sps.hello
-      (str "hello").should.haveParseResult sps.hello, "hello"
+      (str "hello").should.parse "hello world"
+      (str "hello").should.haveParseResult "hello world", "hello"
     it "should parse Unicode strings", ->
-      (str "それ").should.parse sps.テスト
-      (str "それ").should.haveParseResult sps.テスト, "それ"
+      (str "それ").should.parse "それはテストです。"
+      (str "それ").should.haveParseResult "それはテストです。", "それ"
     it "should not parse at end of input", ->
-      (str "anything here").should.not.parse sps.empty
-      (str "anything here").should.haveParseError sps.empty,
+      (str "anything here").should.not.parse ""
+      (str "anything here").should.haveParseError "",
         "ParseError (position 0): Expecting string 'anything here', got end of input"
     it "should not parse an unexpected string", ->
-      (str "hello").should.not.parse sps.abc
-      (str "日本語").should.not.parse sps.テスト
+      (str "hello").should.not.parse "abc"
+      (str "日本語").should.not.parse "それはテストです。"
   
   describe "regex", ->
     it "should only accept regexs", ->
@@ -111,82 +109,82 @@ describe "Parser Generators", ->
       (-> regex /テスト/).should.throw Error
       (-> regex /^xy/).should.not.throw()
     it "should parse ASCII matches", ->
-      (regex /^hello/).should.parse sps.hello
-      (regex /^hello/).should.haveParseResult sps.hello, "hello"
-      (regex /^\w+\sworld/).should.parse sps.hello
-      (regex /^\w+\sworld/).should.haveParseResult sps.hello, "hello world"
+      (regex /^hello/).should.parse "hello world"
+      (regex /^hello/).should.haveParseResult "hello world", "hello"
+      (regex /^\w+\sworld/).should.parse "hello world"
+      (regex /^\w+\sworld/).should.haveParseResult "hello world", "hello world"
     it "should parse Unicode matches", ->
       # Note: Unicode and regular expressions don't really work well together...
-      (regex /^それ/).should.parse sps.テスト
-      (regex /^それ/).should.haveParseResult sps.テスト, "それ"
-      (regex /^それはテスト/).should.parse sps.テスト
-      (regex /^それはテスト/).should.haveParseResult sps.テスト, "それはテスト"
+      (regex /^それ/).should.parse "それはテストです。"
+      (regex /^それ/).should.haveParseResult "それはテストです。", "それ"
+      (regex /^それはテスト/).should.parse "それはテストです。"
+      (regex /^それはテスト/).should.haveParseResult "それはテストです。", "それはテスト"
     it "should not parse at end of input", ->
-      (regex /^hello/).should.not.parse sps.empty
-      (regex /^テスト/).should.not.parse sps.empty
+      (regex /^hello/).should.not.parse ""
+      (regex /^テスト/).should.not.parse ""
       # Interestingly this below doesn't accept end of input
-      (regex /^/).should.not.parse sps.empty
+      (regex /^/).should.not.parse ""
   
   describe "digit", ->
     it "should parse digits", ->
-      digit.should.parse sps.nums
-      digit.should.haveParseResult sps.nums, "1"
+      digit.should.parse "123456"
+      digit.should.haveParseResult "123456", "1"
     it "should not parse non-digit characters", ->
-      digit.should.not.parse sps.abc
-      digit.should.haveParseError sps.abc,
+      digit.should.not.parse "abc"
+      digit.should.haveParseError "abc",
         "ParseError (position 0): Expecting digit, got 'a'"
-      digit.should.not.parse sps.日本語
-      digit.should.haveParseError sps.日本語,
+      digit.should.not.parse "日本語"
+      digit.should.haveParseError "日本語",
         "ParseError (position 0): Expecting digit, got '日'"
     it "should not parse at end of input", ->
-      digit.should.not.parse sps.empty
-      digit.should.haveParseError sps.empty,
+      digit.should.not.parse ""
+      digit.should.haveParseError "",
         "ParseError (position 0): Expecting digit, got end of input"
   
   describe "digits", ->
     it "should parse digits", ->
-      digits.should.parse sps.nums
-      digits.should.haveParseResult sps.nums, "123456"
-      digits.should.parse sps.numalphs
-      digits.should.haveParseResult sps.numalphs, "123"
+      digits.should.parse "123456"
+      digits.should.haveParseResult "123456", "123456"
+      digits.should.parse "123abc"
+      digits.should.haveParseResult "123abc", "123"
     it "should not parse non-digit characters", ->
-      digits.should.not.parse sps.abc
-      digits.should.haveParseError sps.abc,
+      digits.should.not.parse "abc"
+      digits.should.haveParseError "abc",
         "ParseError (position 0): Expecting digits"
-      digits.should.not.parse sps.日本語
-      digits.should.haveParseError sps.日本語,
+      digits.should.not.parse "日本語"
+      digits.should.haveParseError "日本語",
         "ParseError (position 0): Expecting digits"
     it "should not parse at end of input", ->
-      digits.should.not.parse sps.empty
-      digits.should.haveParseError sps.empty,
+      digits.should.not.parse ""
+      digits.should.haveParseError "",
         "ParseError (position 0): Expecting digits"
   
   describe "letter", ->
     it "should parse letters", ->
-      letter.should.parse sps.abc
-      letter.should.haveParseResult sps.abc, 'a'
+      letter.should.parse "abc"
+      letter.should.haveParseResult "abc", 'a'
     it "should not parse non-digit characters", ->
-      letter.should.not.parse sps.nums
-      letter.should.haveParseError sps.nums,
+      letter.should.not.parse "123456"
+      letter.should.haveParseError "123456",
         "ParseError (position 0): Expecting letter, got '1'"
     it "should not parse at end of input", ->
-      letter.should.not.parse sps.empty
-      letter.should.haveParseError sps.empty,
+      letter.should.not.parse ""
+      letter.should.haveParseError "",
         "ParseError (position 0): Expecting letter, got end of input"
   
   describe "letters", ->
     it "should parse letters", ->
-      letters.should.parse sps.abc
-      letters.should.haveParseResult sps.abc, "abc"
-      letters.should.parse sps.alphnums
-      letters.should.haveParseResult sps.alphnums, "abc"
+      letters.should.parse "abc"
+      letters.should.haveParseResult "abc", "abc"
+      letters.should.parse "abc123"
+      letters.should.haveParseResult "abc123", "abc"
     it "should not parse non-letter characters", ->
-      letters.should.not.parse sps.nums
-      letters.should.haveParseError sps.nums,
+      letters.should.not.parse "123456"
+      letters.should.haveParseError "123456",
         "ParseError (position 0): Expecting letters"
     it "should not parse at end of input", ->
-      letters.should.not.parse sps.empty
-      letters.should.haveParseError sps.empty,
+      letters.should.not.parse ""
+      letters.should.haveParseError "",
         "ParseError (position 0): Expecting letters"
   
   describe "anyOfString", ->
@@ -201,29 +199,29 @@ describe "Parser Generators", ->
       (-> anyOfString "何").should.not.throw()
       (-> anyOfString "テストです").should.not.throw()
     it "should parse ASCII strings", ->
-      (anyOfString "oleh").should.parse sps.hello
-      (anyOfString "oleh").should.haveParseResult sps.hello, 'h'
+      (anyOfString "oleh").should.parse "hello world"
+      (anyOfString "oleh").should.haveParseResult "hello world", 'h'
     it "should parse Unicode strings", ->
-      (anyOfString "あれそ").should.parse sps.テスト
-      (anyOfString "あれそ").should.haveParseResult sps.テスト, 'そ'
+      (anyOfString "あれそ").should.parse "それはテストです。"
+      (anyOfString "あれそ").should.haveParseResult "それはテストです。", 'そ'
     it "should not parse at end of input", ->
-      (anyOfString "simp").should.not.parse sps.empty
-      (anyOfString "simp").should.haveParseError sps.empty,
+      (anyOfString "simp").should.not.parse ""
+      (anyOfString "simp").should.haveParseError "",
         "ParseError (position 0): Expecting any of the string 'simp', got end of input"
     it "should not parse an unexpected string", ->
-      (anyOfString "qwerty").should.not.parse sps.abc
-      (anyOfString "あいうえ").should.not.parse sps.テスト
+      (anyOfString "qwerty").should.not.parse "abc"
+      (anyOfString "あいうえ").should.not.parse "それはテストです。"
   
   describe "endOfInput", ->
     it "should parse at end of input", ->
-      endOfInput.should.parse sps.empty
-      endOfInput.should.haveParseResult sps.empty, null
+      endOfInput.should.parse ""
+      endOfInput.should.haveParseResult "", null
     it "should not parse any input", ->
-      endOfInput.should.not.parse sps.abc
-      endOfInput.should.not.parse sps.nums
-      endOfInput.should.not.parse sps.numalphs
-      endOfInput.should.not.parse sps.日本語
-      endOfInput.should.not.parse sps.テスト
+      endOfInput.should.not.parse "abc"
+      endOfInput.should.not.parse "123456"
+      endOfInput.should.not.parse "123abc"
+      endOfInput.should.not.parse "日本語"
+      endOfInput.should.not.parse "それはテストです。"
     it "passes check 42 (yeet)", ->
       state = new ParserState {
         target: new StringPStream "42"
@@ -235,33 +233,33 @@ describe "Parser Generators", ->
   
   describe "whitespace", ->
     it "should parse whitespaces", ->
-      whitespace.should.parse sps.spaces
-      whitespace.should.haveParseResult sps.spaces, "   "
+      whitespace.should.parse "   hmmm"
+      whitespace.should.haveParseResult "   hmmm", "   "
     it "should not parse non-whitespaces", ->
-      whitespace.should.not.parse sps.abc
-      whitespace.should.not.parse sps.nums
-      whitespace.should.not.parse sps.numalphs
-      whitespace.should.not.parse sps.日本語
-      whitespace.should.not.parse sps.テスト
+      whitespace.should.not.parse "abc"
+      whitespace.should.not.parse "123456"
+      whitespace.should.not.parse "123abc"
+      whitespace.should.not.parse "日本語"
+      whitespace.should.not.parse "それはテストです。"
     it "should not parse at end of input", ->
-      whitespace.should.not.parse sps.empty
+      whitespace.should.not.parse ""
   
   describe "optionalWhitespace", ->
     it "should parse whitespaces", ->
-      optionalWhitespace.should.parse sps.spaces
-      optionalWhitespace.should.haveParseResult sps.spaces, "   "
+      optionalWhitespace.should.parse "   hmmm"
+      optionalWhitespace.should.haveParseResult "   hmmm", "   "
     it "should also parse non-whitespaces", ->
-      optionalWhitespace.should.parse sps.abc
-      optionalWhitespace.should.parse sps.nums
-      optionalWhitespace.should.parse sps.numalphs
-      optionalWhitespace.should.parse sps.日本語
-      optionalWhitespace.should.parse sps.テスト
-      optionalWhitespace.should.haveParseResult sps.abc, ""
-      optionalWhitespace.should.haveParseResult sps.nums, ""
-      optionalWhitespace.should.haveParseResult sps.numalphs, ""
-      optionalWhitespace.should.haveParseResult sps.日本語, ""
-      optionalWhitespace.should.haveParseResult sps.テスト, ""
+      optionalWhitespace.should.parse "abc"
+      optionalWhitespace.should.parse "123456"
+      optionalWhitespace.should.parse "123abc"
+      optionalWhitespace.should.parse "日本語"
+      optionalWhitespace.should.parse "それはテストです。"
+      optionalWhitespace.should.haveParseResult "abc", ""
+      optionalWhitespace.should.haveParseResult "123456", ""
+      optionalWhitespace.should.haveParseResult "123abc", ""
+      optionalWhitespace.should.haveParseResult "日本語", ""
+      optionalWhitespace.should.haveParseResult "それはテストです。", ""
     it "should also parse at end of input", ->
-      optionalWhitespace.should.parse sps.empty
-      optionalWhitespace.should.haveParseResult sps.empty, ""
+      optionalWhitespace.should.parse ""
+      optionalWhitespace.should.haveParseResult "", ""
       

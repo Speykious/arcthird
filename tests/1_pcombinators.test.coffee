@@ -8,6 +8,7 @@ chai.use models.parse
 
 Parser      = require "../src/Parser"
 ParserState = require "../src/ParserState"
+{ StringPStream } = require "../src/pstreams"
 {
   getData, setData, mapData, withData
   pipe, compose, tap, parse, strparse
@@ -127,13 +128,15 @@ describe "Parser Combinators", ->
   
   describe "parse", ->
     it "should act like the .parse property", ->
-      ((parse char 'a') "abc").props.should.equal ((char 'a').parse "abc").props
+      abc = new StringPStream "abc"
+      ((parse char 'a') abc).props.should.equal ((char 'a').parse abc).props
     it "doesn't have anything else interesting", ->
       true.should.not.be.false
   
   describe "strparse", ->
+    abc = new StringPStream "abc"
     it "should just work", ->
-      ((strparse char 'a') "abc").props.should.equal ((char 'a').parse "abc").props
+      ((strparse char 'a') "abc").props.should.equal ((char 'a').parse abc).props
   
   describe "decide", ->
     df = (res) -> switch res
@@ -197,16 +200,18 @@ describe "Parser Combinators", ->
         part1 = yield letters
         part2 = yield 42
         return [part1, part2]
-      (-> fakeParser.parse "abc123").should.throw Error
-      (-> fakeParser.parse "abc123").should.throw "[coroutine] yielded values must be Parsers, got 42."
+      (-> (strparse fakeParser) "abc123").should.throw Error
+      (-> (strparse fakeParser) "abc123").should.throw "[coroutine] yielded values must be Parsers, got 42."
   
   describe "exactly", ->
     it "should work exactly as expected", ->
       ((exactly 3) letter).should.haveParseResult "abc", ['a', 'b', 'c']
     it "should fail exactly as expected", ->
       ((exactly 3) letter).should.not.parse "123abc"
+      ((exactly 3) letter).should.haveParseError "123abc", "ParseError (position 0): Expecting 3 letter, got '1'"
     it "should fail at end of input", ->
       ((exactly 4) letter).should.not.parse "abc"
+      (strparse (exactly 4) letter) "123abc", "ParseError (position 0): Expecting 4 letter, got '1'"
     it "should only accept a number > 0", ->
       (-> exactly 0).should.throw TypeError
       (-> exactly 'a').should.throw TypeError
@@ -226,7 +231,9 @@ describe "Parser Combinators", ->
       ((atLeast 0) digit).should.haveParseResult "abc", []
     it "should fail when there aren't enough parsed results", ->
       ((atLeast 4) digit).should.not.parse "123abc"
+      ((atLeast 4) digit).should.haveParseError "123abc", "ParseError 'atLeast' (position 0): Expecting to match at least 4 value(s), received 3 instead"
       ((atLeast 1) digit).should.not.parse "abc"
+      ((atLeast 1) digit).should.haveParseError "abc", "ParseError 'atLeast' (position 0): Expecting to match at least 1 value(s), received 0 instead"
   
   describe "atLeast1", ->
     it "should parse at least 1 thing", ->
@@ -234,6 +241,7 @@ describe "Parser Combinators", ->
       (atLeast1 digit).should.haveParseResult "123456", ['1', '2', '3', '4', '5', '6']
     it "should fail when there isn't at least 1 parsed result", ->
       (atLeast1 digit).should.not.parse "abc"
+      (strparse atLeast1 digit) "abc", "ParseError 'atLeast' (position 0): Expecting to match at least 1 value(s), received 0 instead"
 
   describe "mapTo", ->
     parser = pipe [(char 'a'), mapTo (x) -> ({ letter: x })]
@@ -264,6 +272,7 @@ describe "Parser Combinators", ->
       }
     it "should fail like sequenceOf but named", ->
       parser.should.not.parse "abc"
+      parser.should.haveParseError "abc", "ParseError (position 3): Expecting digits"
   
   describe "sequenceOf", ->
     parser = sequenceOf [letters, digits]
@@ -274,5 +283,14 @@ describe "Parser Combinators", ->
       parser.should.haveParseError "abc", "ParseError (position 3): Expecting digits"
   
   describe "sepBy", ->
+    parser = (sepBy char ',') letter
     it "should correctly separate input", ->
-      ((sepBy char ',') letter).should.haveParseResult "a,b,c", ['a', 'b', 'c']
+      parser.should.haveParseResult "a,b,c", ['a', 'b', 'c']
+    it "should accept empty input", ->
+      parser.should.haveParseResult "", []
+    it "should give nothing if the main parser doesn't work", ->
+      parser.should.haveParseResult "1,2,3", []
+    it "Hmmm... I'm not sure about that test", ->
+      parser.should.not.parse "a,b,"
+      parser.should.haveParseError "a,b,", "ParseError (position 4): Expecting letter, got end of input"
+  

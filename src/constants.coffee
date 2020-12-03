@@ -4,7 +4,7 @@ reDigits = /^[0-9]+/
 reLetter = /[a-zA-Z]/
 reLetters = /^[a-zA-Z]+/
 reWhitespaces = /^\s+/
-reErrorExpectation = /ParseError.+Expecting/
+reErrorExpectation = /ParseError.+Expecting\s*/
 
 module.exports = {
   reDigit
