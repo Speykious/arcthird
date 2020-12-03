@@ -30,83 +30,81 @@ ParserState = require "../src/ParserState"
 
 join = (s) -> (l) -> l.join s
 
-sps = require "./sps"
-
 describe "Parser Combinators", ->
   describe "getData", ->
     p = withData coroutine () ->
       sd = yield getData
       return sd
     it "should parse something", ->
-      (p "data").should.parse sps.abc
-      (p "data").should.parse sps.empty
+      (p "data").should.parse "abc"
+      (p "data").should.parse ""
     it "should get data from the parser", ->
-      (p "data").should.haveParseResult sps.abc, "data"
+      (p "data").should.haveParseResult "abc", "data"
     it "should get data even when PStream is empty", ->
-      (p "data").should.haveParseResult sps.empty, "data"
+      (p "data").should.haveParseResult "", "data"
 
   describe "setData", ->
     parser = coroutine () ->
       yield setData "new data"
       return 42
     it "should parse something", ->
-      parser.should.parse sps.abc
-      parser.should.parse sps.empty
+      parser.should.parse "abc"
+      parser.should.parse ""
     it "should set data on the parser", ->
-      parser.should.haveParseResult sps.abc, 42
-      parser.should.haveParseData sps.abc, "new data"
+      parser.should.haveParseResult "abc", 42
+      parser.should.haveParseData "abc", "new data"
     it "should set data even when PStream is empty", ->
-      parser.should.haveParseResult sps.empty, 42
-      parser.should.haveParseData sps.empty, "new data"
+      parser.should.haveParseResult "", 42
+      parser.should.haveParseData "", "new data"
   
   describe "mapData", ->
     p = withData coroutine () ->
       yield mapData (d) -> d.map (x) -> x * 2
       return 42
     it "should parse something", ->
-      (p [1, 2, 3]).should.parse sps.abc
-      (p [1, 2, 3]).should.parse sps.empty
+      (p [1, 2, 3]).should.parse "abc"
+      (p [1, 2, 3]).should.parse ""
     it "should map data on the parser", ->
-      (p [1, 2, 3]).should.haveParseResult sps.abc, 42
-      (p [1, 2, 3]).should.haveParseData sps.abc, [2, 4, 6]
+      (p [1, 2, 3]).should.haveParseResult "abc", 42
+      (p [1, 2, 3]).should.haveParseData "abc", [2, 4, 6]
     it "should map data even when PStream is empty", ->
-      (p [1, 2, 3]).should.haveParseResult sps.empty, 42
-      (p [1, 2, 3]).should.haveParseData sps.empty, [2, 4, 6]
+      (p [1, 2, 3]).should.haveParseResult "", 42
+      (p [1, 2, 3]).should.haveParseData "", [2, 4, 6]
   
   describe "withData", ->
     parser = (withData digits) "my data"
     it "should parse something", ->
-      parser.should.parse sps.numalphs
-      parser.should.not.parse sps.empty
+      parser.should.parse "123abc"
+      parser.should.not.parse ""
     it "should have data on the parser", ->
-      parser.should.haveParseResult sps.numalphs, "123"
-      parser.should.haveParseData sps.numalphs, "my data"
+      parser.should.haveParseResult "123abc", "123"
+      parser.should.haveParseData "123abc", "my data"
     it "should have data even when PStream is empty", ->
-      parser.should.haveParseData sps.empty, "my data"
+      parser.should.haveParseData "", "my data"
   
   describe "pipe", ->
     parser = pipe [(str "hello"), (char ' '), (str "world")]
     it "should parse like a pipe", ->
-      parser.should.parse sps.hello
+      parser.should.parse "hello world"
     it "should fail like a parser", ->
-      parser.should.not.parse sps.alphnums
+      parser.should.not.parse "abc123"
     it "should act like a pipe", ->
-      parser.should.haveParseResult sps.hello, "world"
+      parser.should.haveParseResult "hello world", "world"
   
   describe "compose", ->
     parser = compose [(str "world"), (char ' '), (str "hello")]
     it "should parse like a composition", ->
-      parser.should.parse sps.hello
+      parser.should.parse "hello world"
     it "should fail like a parser", ->
-      parser.should.not.parse sps.alphnums
+      parser.should.not.parse "abc123"
     it "should act like a composition", ->
-      parser.should.haveParseResult sps.hello, "world"
+      parser.should.haveParseResult "hello world", "world"
   
   describe "tap", ->
     state = undefined
     parser = pipe [(char 'a'), (tap (x) -> state = x)]
     it "should parse something", ->
-      parser.should.parse sps.abc
+      parser.should.parse "abc"
     it "should have been called", ->
       state.should.not.be.undefined
     it "passes check 69 (yeet²)", ->
@@ -117,7 +115,7 @@ describe "Parser Combinators", ->
       (expect state.error).to.be.null
     state = undefined
     it "should fail here", ->
-      parser.should.not.parse sps.xyz
+      parser.should.not.parse "xyz"
     it "should still be called after fail", ->
       state.should.not.be.undefined
     it "should tap the fail correctly", ->
@@ -129,13 +127,13 @@ describe "Parser Combinators", ->
   
   describe "parse", ->
     it "should act like the .parse property", ->
-      ((parse char 'a') sps.abc).props.should.equal ((char 'a').parse sps.abc).props
+      ((parse char 'a') "abc").props.should.equal ((char 'a').parse "abc").props
     it "doesn't have anything else interesting", ->
       true.should.not.be.false
   
   describe "strparse", ->
     it "should just work", ->
-      ((strparse char 'a') "abc").props.should.equal ((char 'a').parse sps.abc).props
+      ((strparse char 'a') "abc").props.should.equal ((char 'a').parse "abc").props
   
   describe "decide", ->
     df = (res) -> switch res
@@ -144,41 +142,41 @@ describe "Parser Combinators", ->
       else fail "nope"
     parser = pipe [letters, decide df]
     it "should decide the right thing (1)", ->
-      parser.should.parse sps.alphnums
-      parser.should.haveParseResult sps.alphnums, "123"
+      parser.should.parse "abc123"
+      parser.should.haveParseResult "abc123", "123"
     it "should decide the right thing (2)", ->
-      parser.should.parse sps.hello
-      parser.should.haveParseResult sps.hello, " world"
+      parser.should.parse "hello world"
+      parser.should.haveParseResult "hello world", " world"
     it "should not decide the wrong thing", ->
-      parser.should.not.parse sps.xyz
-      parser.should.haveParseError sps.xyz, "nope"
+      parser.should.not.parse "xyz"
+      parser.should.haveParseError "xyz", "nope"
   
   describe "fail", ->
     it "fails successfully", ->
-      (fail "task failed successfully").should.not.parse sps.hello
+      (fail "task failed successfully").should.not.parse "hello world"
     it "generates the right error", ->
-      (fail "task failed successfully").should.haveParseError sps.hello, "task failed successfully"
+      (fail "task failed successfully").should.haveParseError "hello world", "task failed successfully"
   
   describe "succeedWith", ->
     it "should parse anything", ->
-      (succeedWith "a career").should.parse sps.abc
-      (succeedWith "a career").should.parse sps.テスト
+      (succeedWith "a career").should.parse "abc"
+      (succeedWith "a career").should.parse "それはテストです。"
     it "should parse nothing", ->
-      (succeedWith "nothing").should.parse sps.empty
+      (succeedWith "nothing").should.parse ""
     it "should actually succeed with the value", ->
-      (succeedWith "a career").should.haveParseResult sps.abc, "a career"
-      (succeedWith "nothing").should.haveParseResult sps.empty, "nothing"
+      (succeedWith "a career").should.haveParseResult "abc", "a career"
+      (succeedWith "nothing").should.haveParseResult "", "nothing"
   
   describe "either", ->
     it "should work when it works", ->
-      (either char 'a').should.parse sps.abc
-      (either char 'a').should.parse sps.alphnums
+      (either char 'a').should.parse "abc"
+      (either char 'a').should.parse "abc123"
     it "should work when it fails", ->
-      (either char 'a').should.parse sps.xyz
-      (either char 'a').should.parse sps.テスト
-      (either char 'a').should.parse sps.empty
-      (either fail "nope").should.parse sps.hello
-      (either fail "nope").should.parse sps.empty
+      (either char 'a').should.parse "xyz"
+      (either char 'a').should.parse "それはテストです。"
+      (either char 'a').should.parse ""
+      (either fail "nope").should.parse "hello world"
+      (either fail "nope").should.parse ""
   
   describe "coroutine", ->
     parser = coroutine () ->
@@ -186,62 +184,62 @@ describe "Parser Combinators", ->
       part2 = yield digits
       return [part1, part2]
     it "should correctly use yielded parsers", ->
-      parser.should.parse sps.alphnums
-      parser.should.haveParseResult sps.alphnums, ["abc", "123"]
+      parser.should.parse "abc123"
+      parser.should.haveParseResult "abc123", ["abc", "123"]
     it "should not be stateful on second usage", ->
-      parser.should.parse sps.xyphnums
-      parser.should.haveParseResult sps.xyphnums, ["xyz", "987"]
+      parser.should.parse "xyz987"
+      parser.should.haveParseResult "xyz987", ["xyz", "987"]
     it "should show the correct error", ->
-      parser.should.not.parse sps.abc
-      parser.should.haveParseError sps.abc, "ParseError (position 3): Expecting digits"
+      parser.should.not.parse "abc"
+      parser.should.haveParseError "abc", "ParseError (position 3): Expecting digits"
     it "should only accept parsers as yielded values", ->
       fakeParser = coroutine () ->
         part1 = yield letters
         part2 = yield 42
         return [part1, part2]
-      (-> fakeParser.parse sps.alphnums).should.throw Error
-      (-> fakeParser.parse sps.alphnums).should.throw "[coroutine] yielded values must be Parsers, got 42."
+      (-> fakeParser.parse "abc123").should.throw Error
+      (-> fakeParser.parse "abc123").should.throw "[coroutine] yielded values must be Parsers, got 42."
   
   describe "exactly", ->
     it "should work exactly as expected", ->
-      ((exactly 3) letter).should.haveParseResult sps.abc, ['a', 'b', 'c']
+      ((exactly 3) letter).should.haveParseResult "abc", ['a', 'b', 'c']
     it "should fail exactly as expected", ->
-      ((exactly 3) letter).should.not.parse sps.numalphs
+      ((exactly 3) letter).should.not.parse "123abc"
     it "should fail at end of input", ->
-      ((exactly 4) letter).should.not.parse sps.abc
+      ((exactly 4) letter).should.not.parse "abc"
     it "should only accept a number > 0", ->
       (-> exactly 0).should.throw TypeError
       (-> exactly 'a').should.throw TypeError
   
   describe "many", ->
     it "should parse many things", ->
-      (many digit).should.haveParseResult sps.numalphs, ['1', '2', '3']
-      (many digit).should.haveParseResult sps.nums, ['1', '2', '3', '4', '5', '6']
+      (many digit).should.haveParseResult "123abc", ['1', '2', '3']
+      (many digit).should.haveParseResult "123456", ['1', '2', '3', '4', '5', '6']
     it "should not fail when nothing is parsed", ->
-      (many digit).should.haveParseResult sps.abc, []
+      (many digit).should.haveParseResult "abc", []
   
   describe "atLeast", ->
     it "should parse at least x things", ->
-      ((atLeast 2) digit).should.haveParseResult sps.numalphs, ['1', '2', '3']
-      ((atLeast 1) digit).should.haveParseResult sps.nums, ['1', '2', '3', '4', '5', '6']
+      ((atLeast 2) digit).should.haveParseResult "123abc", ['1', '2', '3']
+      ((atLeast 1) digit).should.haveParseResult "123456", ['1', '2', '3', '4', '5', '6']
     it "should not fail when nothing is parsed for at least 0", ->
-      ((atLeast 0) digit).should.haveParseResult sps.abc, []
+      ((atLeast 0) digit).should.haveParseResult "abc", []
     it "should fail when there aren't enough parsed results", ->
-      ((atLeast 4) digit).should.not.parse sps.numalphs
-      ((atLeast 1) digit).should.not.parse sps.abc
+      ((atLeast 4) digit).should.not.parse "123abc"
+      ((atLeast 1) digit).should.not.parse "abc"
   
   describe "atLeast1", ->
     it "should parse at least 1 thing", ->
-      (atLeast1 digit).should.haveParseResult sps.numalphs, ['1', '2', '3']
-      (atLeast1 digit).should.haveParseResult sps.nums, ['1', '2', '3', '4', '5', '6']
+      (atLeast1 digit).should.haveParseResult "123abc", ['1', '2', '3']
+      (atLeast1 digit).should.haveParseResult "123456", ['1', '2', '3', '4', '5', '6']
     it "should fail when there isn't at least 1 parsed result", ->
-      (atLeast1 digit).should.not.parse sps.abc
+      (atLeast1 digit).should.not.parse "abc"
 
   describe "mapTo", ->
     parser = pipe [(char 'a'), mapTo (x) -> ({ letter: x })]
     it "should map correctly", ->
-      parser.should.haveParseResult sps.abc, { letter: 'a' }
-      (mapTo (x) -> "bruh").should.haveParseResult sps.empty, "bruh"
+      parser.should.haveParseResult "abc", { letter: 'a' }
+      (mapTo (x) -> "bruh").should.haveParseResult "", "bruh"
   
   describe "errorMapTo", ->
     parser = pipe [
@@ -250,30 +248,30 @@ describe "Parser Combinators", ->
       errorMapTo ({ index }) -> "Failed to parse structure @ #{index}"
     ]
     it "shouldn't change the behavior of the parser", ->
-      parser.should.parse sps.spaces
-      parser.should.parse sps.alphnums
+      parser.should.parse "   hmmm"
+      parser.should.parse "abc123"
     it "should give the mapped error", ->
-      parser.should.not.parse sps.abc
-      parser.should.haveParseError sps.abc, "Failed to parse structure @ 3"
+      parser.should.not.parse "abc"
+      parser.should.haveParseError "abc", "Failed to parse structure @ 3"
   
   describe "namedSequenceOf", ->
     parser = namedSequenceOf [ ["letters", letters]
                                ["numbers", digits] ]
     it "should parse like sequenceOf but named", ->
-      parser.should.haveParseResult sps.alphnums, {
+      parser.should.haveParseResult "abc123", {
         letters: "abc"
         numbers: "123"
       }
     it "should fail like sequenceOf but named", ->
-      parser.should.not.parse sps.abc
+      parser.should.not.parse "abc"
   
   describe "sequenceOf", ->
     parser = sequenceOf [letters, digits]
     it "should parse like a sequence of parsers", ->
-      parser.should.haveParseResult sps.alphnums, ["abc", "123"]
+      parser.should.haveParseResult "abc123", ["abc", "123"]
     it "should fail when one of them fail", ->
-      parser.should.not.parse sps.abc
-      parser.should.haveParseError sps.abc, "ParseError (position 3): Expecting digits"
+      parser.should.not.parse "abc"
+      parser.should.haveParseError "abc", "ParseError (position 3): Expecting digits"
   
   describe "sepBy", ->
     it "should correctly separate input", ->
