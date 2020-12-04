@@ -18,10 +18,10 @@ ParserState = require "../src/ParserState"
   namedSequenceOf, sequenceOf
   sepBy, sepBy1, choice, between
   everythingUntil, everyCharUntil
-  # Marker of things left to do
   anythingExcept, anyCharExcept
   lookAhead, possibly, skip
   recursiveParser, takeRight, takeLeft
+  # Marker of things left to do
   toPromise, toValue
 } = require "../src/pcombinators"
 {
@@ -352,3 +352,92 @@ describe "Parser Combinators", ->
       parser.should.not.parse ""
       parser.should.haveParseError "", "ParseError 'everythingUntil' (position 0): Unexpected end of input"
   
+  describe "anythingExcept", ->
+    parser = anythingExcept char '!'
+    it "should parse anything except the parser", ->
+      parser.should.haveParseResult "a", ('a'.charCodeAt 0)
+      parser.should.haveParseResult "1", ('1'.charCodeAt 0)
+    it "should do the same for unicode characters", ->
+      parser.should.haveParseResult "あ", (Buffer.from 'あ')[0]
+    it "should fail when the parser doesn't", ->
+      parser.should.not.parse "!"
+      parser.should.haveParseError "!", "ParseError 'anythingExcept' (position 0): Matched '!' from the exception parser"
+  
+  describe "anyCharExcept", ->
+    parser = anyCharExcept char '!'
+    it "should parse anything except the parser", ->
+      parser.should.haveParseResult "a", 'a'
+      parser.should.haveParseResult "1", '1'
+    it "should do the same for unicode characters", ->
+      parser.should.haveParseResult "あ", 'あ'
+    it "should fail when the parser doesn't", ->
+      parser.should.not.parse "!"
+      parser.should.haveParseError "!", "ParseError 'anyCharExcept' (position 0): Matched '!' from the exception parser"
+  
+  describe "lookAhead", ->
+    parser = lookAhead char 'a'
+    it "should give the correct result", ->
+      parser.should.haveParseResult "aaaa", 'a'
+    it "should work in a pipe", ->
+      (pipe [parser, char 'a']).should.haveParseResult "aaaa", 'a'
+    it "should fail if the inner parser fails", ->
+      parser.should.not.parse "b"
+      parser.should.haveParseError "b", "ParseError (position 0): Expecting character 'a', got 'b'"
+  
+  describe "possibly", ->
+    parser = possibly char 'a'
+    it "should be possible", ->
+      parser.should.haveParseResult "a", 'a'
+    it "should be optional", ->
+      parser.should.haveParseResult "b", null
+    it "should be optional for an empty input", ->
+      parser.should.haveParseResult "", null
+    it "should be optional even for a literal failure", ->
+      (possibly fail "nope").should.parse "a", null
+  
+  describe "skip", ->
+    parser = skip char 'a'
+    it "should skip the inner parser", ->
+      parser.should.haveParseResult "a", undefined
+    it "should fail if the inner parser fails", ->
+      parser.should.not.parse "b"
+      parser.should.haveParseError "b", "ParseError (position 0): Expecting character 'a', got 'b'"
+  
+  describe "recursiveParser", ->
+    parser = recursiveParser () -> choice [letter, digit, arr]
+    arr = between(char '[')(char ']') (sepBy char ',') parser
+    it "should just work", ->
+      parser.should.haveParseResult "abc", 'a'
+      parser.should.haveParseResult "123", '1'
+    it "should just work²", ->
+      parser.should.haveParseResult "[1,a,b]", ['1', 'a', 'b']
+      parser.should.haveParseResult "[1,a,[2,b]]", ['1', 'a', ['2', 'b']]
+    it "should fail like any parser", ->
+      parser.should.not.parse "!nope"
+      parser.should.haveParseError "!nope", "ParseError (position 0): Expecting letter, got '!'"
+    it "should also fail at empty input", ->
+      parser.should.not.parse ""
+      parser.should.haveParseError "", "ParseError (position 0): Expecting letter, got end of input"
+  
+  describe "takeRight", ->
+    parser = (takeRight str "abc") str "def"
+    it "should abandon the left one", ->
+      parser.should.haveParseResult "abcdef", "def"
+    it "should fail like a sequence", ->
+      parser.should.not.parse "abc"
+      parser.should.haveParseError "abc", "ParseError (position 3): Expecting string 'def', got end of input"
+    it "should fail at empty input like the left parser", ->
+      parser.should.not.parse ""
+      parser.should.haveParseError "", "ParseError (position 0): Expecting string 'abc', got end of input"
+  
+  describe "takeLeft", ->
+    parser = (takeLeft str "abc") str "def"
+    it "should abandon the right one", ->
+      parser.should.haveParseResult "abcdef", "abc"
+    it "should fail like a sequence", ->
+      parser.should.not.parse "abc"
+      parser.should.haveParseError "abc", "ParseError (position 3): Expecting string 'def', got end of input"
+    it "should fail at empty input like the left parser", ->
+      parser.should.not.parse ""
+      parser.should.haveParseError "", "ParseError (position 0): Expecting string 'abc', got end of input"
+      
