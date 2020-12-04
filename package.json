@@ -10,7 +10,7 @@
     "lib/**/*"
   ],
   "scripts": {
-    "build": "coffee -bcmo lib src",
+    "build": "coffee -bco lib src",
     "test": "mocha --require coffeescript/register \"tests/**/*.test.coffee\"",
     "watchest": "mocha -w --require coffeescript/register \"tests/**/*.test.coffee\""
   },
