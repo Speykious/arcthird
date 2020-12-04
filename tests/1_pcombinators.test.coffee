@@ -16,9 +16,9 @@ ParserState = require "../src/ParserState"
   coroutine, exactly, many, atLeast, atLeast1
   mapTo, errorMapTo
   namedSequenceOf, sequenceOf
-  # Marker of things left to do
   sepBy, sepBy1, choice, between
   everythingUntil, everyCharUntil
+  # Marker of things left to do
   anythingExcept, anyCharExcept
   lookAhead, possibly, skip
   recursiveParser, takeRight, takeLeft
@@ -293,4 +293,62 @@ describe "Parser Combinators", ->
     it "Hmmm... I'm not sure about that test", ->
       parser.should.not.parse "a,b,"
       parser.should.haveParseError "a,b,", "ParseError (position 4): Expecting letter, got end of input"
+  
+  describe "sepBy1", ->
+    parser = (sepBy1 char ',') letter
+    it "should correctly separate input", ->
+      parser.should.haveParseResult "a,b,c", ['a', 'b', 'c']
+    it "should not accept empty input", ->
+      parser.should.not.parse ""
+      parser.should.haveParseError "", "ParseError 'sepBy1' (position 0): Expecting to match at least one separated value"
+    it "should fail if the main parser doesn't work", ->
+      parser.should.not.parse "1,2,3"
+      parser.should.haveParseError "1,2,3", "ParseError 'sepBy1' (position 0): Expecting to match at least one separated value"
+    it "Hmmm... I'm not sure about that test", ->
+      parser.should.not.parse "a,b,"
+      parser.should.haveParseError "a,b,", "ParseError (position 4): Expecting letter, got end of input"
+  
+  describe "choice", ->
+    parser = choice [letter, digit, char '!']
+    it "should work for each choice", ->
+      parser.should.haveParseResult "abcd", 'a'
+      parser.should.haveParseResult "1bcd", '1'
+      parser.should.haveParseResult "!bcd", '!'
+    it "should not work for anything else", ->
+      parser.should.not.parse "-bcd"
+      parser.should.haveParseError "-bcd", "ParseError (position 0): Expecting letter, got '-'"
+  
+  describe "between", ->
+    parser = between(char '(')(char ')') letters
+    it "should parse between parsers", ->
+      parser.should.haveParseResult "(hello)", "hello"
+    it "should parse between parsers (2)", ->
+      (between(char '[')(char ']') (sepBy char ',') digit).should.haveParseResult "[1,2,3,4]", '1234'.split ''
+    it "should not parse when incomplete", ->
+      parser.should.not.parse "(hello world)"
+      parser.should.haveParseError "(hello world)", "ParseError (position 6): Expecting character ')', got ' '"
+  
+  describe "everythingUntil", ->
+    parser = everythingUntil char '!'
+    it "should parse everything until the parser", ->
+      parser.should.haveParseResult "テスト!日本語に", [(Buffer.from "テスト")...]
+    it "should work with a simple pipe", ->
+      (pipe [parser, char '!']).should.haveParseResult "テスト!日本語に", '!'
+    it "should be able to give nothing", ->
+      parser.should.haveParseResult "!", []
+    it "should fail if the until never arrives", ->
+      parser.should.not.parse ""
+      parser.should.haveParseError "", "ParseError 'everythingUntil' (position 0): Unexpected end of input"
+  
+  describe "everyCharUntil", ->
+    parser = everyCharUntil char '!'
+    it "should parse every char until the parser", ->
+      parser.should.haveParseResult "テスト!日本語に", "テスト"
+    it "should work with a simple pipe", ->
+      (pipe [parser, char '!']).should.haveParseResult "テスト!日本語に", '!'
+    it "should be able to give nothing (really?)", ->
+      parser.should.haveParseResult "!", ""
+    it "should fail if the until never arrives", ->
+      parser.should.not.parse ""
+      parser.should.haveParseError "", "ParseError 'everythingUntil' (position 0): Unexpected end of input"
   
