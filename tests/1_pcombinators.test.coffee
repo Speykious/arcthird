@@ -441,3 +441,16 @@ describe "Parser Combinators", ->
       parser.should.not.parse ""
       parser.should.haveParseError "", "ParseError (position 0): Expecting string 'abc', got end of input"
   
+  describe "toValue", ->
+    lparser = (strparse str "haha yesn't") "nope"
+    rparser = (strparse str "yeet") "yeet²"
+    it "should throw an error when the parser fails", ->
+      try
+        toValue lparser
+        throw new Error "Expected to throw error"
+      catch e
+        # Not sure if str should behave like that
+        e.message.should.equal "ParseError (position 0): Expecting string 'haha yesn't', got end of input"
+        e.parseIndex.should.equal 0
+    it "should return the value when it succeeds", ->
+      (toValue rparser).should.equal "yeet"

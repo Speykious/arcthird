@@ -31,27 +31,3 @@ describe "toPromise", ->
   catch e
     console.log e
 ###
-
-describe "Promise Stuff", ->
-  failer = toPromise (strparse fail "crash") "nope"
-  .then (x) ->
-    console.log "WTF (then) ->", x
-    throw new Error "Expected to reject, got '#{x}'"
-  .catch (e) ->
-    console.log e
-    return Promise.resolve e
-  succer = toPromise (strparse Parser.of "all good") "nope"
-  .catch (e) ->
-    console.log "WTF ->", e
-    throw new Error "Expected to resolve, got '#{e}'"
-  
-  it "should resolve with result when succeeding", ->
-    succer.should.eventually.equal "all good"
-  it "should reject with error when failing", ->
-    failer.should.eventually.equal {
-      data: null
-      isError: yes
-      error: "crash"
-      index: 0
-    }
-    
