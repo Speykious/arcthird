@@ -440,4 +440,4 @@ describe "Parser Combinators", ->
     it "should fail at empty input like the right parser", ->
       parser.should.not.parse ""
       parser.should.haveParseError "", "ParseError (position 0): Expecting string 'abc', got end of input"
-      
+  
