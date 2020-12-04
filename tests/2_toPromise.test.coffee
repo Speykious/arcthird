@@ -1,8 +1,6 @@
 ###
 chai = require "chai"
 chai.should()
-chaiAsPromised = require "chai-as-promised"
-chai.use chaiAsPromised
 
 Parser = require "../src/Parser"
 { toPromise, strparse, fail } = require "../src/pcombinators"
