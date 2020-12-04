@@ -437,7 +437,7 @@ describe "Parser Combinators", ->
     it "should fail like a sequence", ->
       parser.should.not.parse "abc"
       parser.should.haveParseError "abc", "ParseError (position 3): Expecting string 'def', got end of input"
-    it "should fail at empty input like the left parser", ->
+    it "should fail at empty input like the right parser", ->
       parser.should.not.parse ""
       parser.should.haveParseError "", "ParseError (position 0): Expecting string 'abc', got end of input"
       
