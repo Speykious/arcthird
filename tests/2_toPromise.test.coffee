@@ -1,3 +1,4 @@
+###
 chai = require "chai"
 chai.should()
 chaiAsPromised = require "chai-as-promised"
@@ -6,7 +7,7 @@ chai.use chaiAsPromised
 Parser = require "../src/Parser"
 { toPromise, strparse, fail } = require "../src/pcombinators"
 
-###
+
 describe "toPromise", ->
   failer = toPromise (strparse fail "crash") "nope"
   succer = toPromise (strparse Parser.of "all good") "nope"

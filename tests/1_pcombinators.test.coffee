@@ -454,3 +454,5 @@ describe "Parser Combinators", ->
         e.parseIndex.should.equal 0
     it "should return the value when it succeeds", ->
       (toValue rparser).should.equal "yeet"
+
+  # Note: due to UnhandledPromiseRejection problems, toPromise is probably gonna get its own unique testing file without using chai in the process.
