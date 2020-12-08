@@ -36,7 +36,7 @@ anyChar = new Parser (s) ->
       return s.update char, index + 1
   return s.errorify "ParseError (position #{index}): Expecting any character, got end of input"
 
-# peek :: Parser
+# peek :: PStream t => Parser t a d
 peek = new Parser (s) ->
   if s.isError then return s
   { index, target } = s
@@ -78,7 +78,7 @@ regex = (re) ->
     return if match then s.update match[0], index + match[0].length
     else s.errorify "ParseError (position #{index}: Expecting string matching '#{re}', got '#{rest.slice 0, 5}...'"
 
-# digit :: Parser String String d
+# digit :: StringPStream t => Parser t String d
 digit = new Parser (s) ->
   unless s.target instanceof StringPStream
     throw new TypeError "digit expects a StringPStream instance as target, got #{typeof target} instead"
@@ -93,11 +93,11 @@ digit = new Parser (s) ->
       else s.errorify "ParseError (position #{index}): Expecting digit, got '#{char}'"
   return s.errorify "ParseError (position #{index}): Expecting digit, got end of input"
 
-# digits :: Parser String String d
+# digits :: StringPStream t => Parser t String d
 digits = (regex reDigits).errorMap ({ index }) ->
   "ParseError (position #{index}): Expecting digits"
 
-# letter :: Parser String String d
+# letter :: StringPStream t => Parser t String d
 letter = new Parser (s) ->
   unless s.target instanceof StringPStream
     throw new TypeError "letter expects a StringPStream instance as target, got #{typeof target} instead"
@@ -112,11 +112,11 @@ letter = new Parser (s) ->
       else s.errorify "ParseError (position #{index}): Expecting letter, got '#{char}'"
   return s.errorify "ParseError (position #{index}): Expecting letter, got end of input"
 
-# letters :: Parser String String d
+# letters :: StringPStream t => Parser t String d
 letters = (regex reLetters).errorMap ({ index }) ->
   "ParseError (position #{index}): Expecting letters"
 
-# anyOfString :: String -> Parser String Char d
+# anyOfString :: StringPStream t => String -> Parser t Char d
 anyOfString = (xs) ->
   unless xs and typeof xs is "string" and (charlength xs) > 0
     throw new TypeError "str must be called with a string with length > 0, got #{xs}"

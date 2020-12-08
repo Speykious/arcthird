@@ -16,7 +16,7 @@ class PStream
     then @elementAt @index++
     else null
   
-  # nexts :: Int -> a
+  # nexts :: Int -> [a]
   nexts: (n) ->
     start = @index
     nels = []
