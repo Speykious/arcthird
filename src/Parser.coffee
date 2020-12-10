@@ -78,7 +78,7 @@ class Parser
       state = pf s
       return state.dataify f state.data
 
-  # of :: PStream t => Parser t a d ~> x -> Parser t x d
+  # of :: PStream t => x -> Parser t x d
   @of: (x) -> new Parser (s) -> s.resultify(x)
 
 module.exports = Parser
