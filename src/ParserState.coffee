@@ -32,9 +32,9 @@ class ParserState
     data:    @data
   })
 
-  resultify: (result) -> new ParserState({ @props()..., result })
+  resultify: (result) -> new ParserState({ @props()..., error: null, isError: false, result })
   errorify:  (error)  -> new ParserState({ @props()..., error, isError: true })
   dataify:   (data)   -> new ParserState({ @props()..., data })
-  update: (result, index) -> new ParserState({ @props()..., result, index })
+  update: (result, index) -> new ParserState({ @props()..., error: null, isError: false, result, index })
   
 module.exports = ParserState

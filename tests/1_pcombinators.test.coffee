@@ -21,8 +21,7 @@ ParserState = require "../src/ParserState"
   anythingExcept, anyCharExcept
   lookAhead, possibly, skip
   recursiveParser, takeRight, takeLeft
-  # Marker of things left to do
-  toPromise, toValue
+  toValue
 } = require "../src/pcombinators"
 {
   digit, digits, letter, letters
@@ -218,9 +217,11 @@ describe "Parser Combinators", ->
   
   describe "many", ->
     it "should parse many things", ->
+      (many digit).should.parse "123456"
       (many digit).should.haveParseResult "123abc", ['1', '2', '3']
-      (many digit).should.haveParseResult "123456", ['1', '2', '3', '4', '5', '6']
+
     it "should not fail when nothing is parsed", ->
+      (many digit).should.parse "abc"
       (many digit).should.haveParseResult "abc", []
   
   describe "atLeast", ->
