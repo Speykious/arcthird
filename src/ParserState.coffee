@@ -21,6 +21,7 @@ class ParserState
   })
 
   errorProps: -> ({
+    target:  @target
     data:    @data
     isError: @isError
     error:   @error
