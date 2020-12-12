@@ -33,7 +33,7 @@ class ParserState
   })
 
   resultify: (result) -> new ParserState({ @props()..., error: null, isError: false, result })
-  errorify:  (error)  -> new ParserState({ @props()..., error, isError: true })
+  errorify:  (error)  -> new ParserState({ @props()..., error, isError: true, result: undefined })
   dataify:   (data)   -> new ParserState({ @props()..., data })
   update: (result, index) -> new ParserState({ @props()..., error: null, isError: false, result, index })
   
