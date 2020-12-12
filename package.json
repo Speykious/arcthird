@@ -1,6 +1,6 @@
 {
   "name": "arcthird",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "A modern and more abstract version of the Arcsecond library made with Coffeescript.",
   "main": "lib/index.js",
   "repository": "https://gitlab.com/Speykious/arcthird",
