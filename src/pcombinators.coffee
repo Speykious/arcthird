@@ -110,13 +110,15 @@ many = (parser) ->
   new Parser (s) ->
     if s.isError then return s
     results = []
+    lastIndex = s.index
     loop
       s = parser.pf s
       if s.isError then break
+      lastIndex = s.index
       results.push s.result
       { target, index } = s
       if target.length() and index >= target.length() then break
-    return s.resultify results
+    return s.update results, index
 
 # atLeast :: PStream t => Int -> Parser t a d -> Parser t [a] d
 atLeast = (n) -> (parser) ->
