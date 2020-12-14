@@ -35,6 +35,15 @@ compose = (parsers) ->
   new Parser (s) ->
     (pipe [parsers...].reverse()).pf s
 
+# pipeResult :: PStream t => [Parser * * *] -> Parser t * *
+pipeResult = ([p1, parsers...]) ->
+  new Parser (s) ->
+    s = p1.pf s
+    for parser in parsers
+      if s.isError then break
+      s = parser.parse s.result
+    return s
+
 # tap :: PStream t => (ParserState t a d -> IO ()) -> Parser t a d
 tap = (f) ->
   new Parser (s) ->
@@ -363,8 +372,8 @@ toValue = (s) ->
 
 module.exports = {
   getData, setData, mapData, withData
-  pipe, compose, tap, parse, strparse
-  decide, fail, succeedWith, either
+  pipe, pipeResult, compose, tap, parse
+  strparse, decide, fail, succeedWith, either
   coroutine, exactly, many, atLeast, atLeast1
   mapTo, errorMapTo, intersperseWith
   namedSequenceOf, sequenceOf

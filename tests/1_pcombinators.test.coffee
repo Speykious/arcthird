@@ -11,8 +11,8 @@ ParserState = require "../src/ParserState"
 { StringPStream } = require "../src/pstreams"
 {
   getData, setData, mapData, withData
-  pipe, compose, tap, parse, strparse
-  decide, fail, succeedWith, either
+  pipe, compose, pipeResult, tap, parse
+  strparse, decide, fail, succeedWith, either
   coroutine, exactly, many, atLeast, atLeast1
   mapTo, errorMapTo, intersperseWith
   namedSequenceOf, sequenceOf
@@ -99,6 +99,15 @@ describe "Parser Combinators", ->
       parser.should.not.parse "abc123"
     it "should act like a composition", ->
       parser.should.haveParseResult "hello world", "world"
+  
+  describe "pipeResult", ->
+    parser = pipeResult [((str "hello").map (s) -> new StringPStream s), (char 'h')]
+    it "should parse like a pipe of results", ->
+      parser.should.parse "hello world"
+    it "should fail like a parser", ->
+      parser.should.not.parse "hell123"
+    it "should act like a pipe of results", ->
+      parser.should.haveParseResult "hello world", 'h'
   
   describe "tap", ->
     state = undefined
