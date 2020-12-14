@@ -19,7 +19,6 @@ describe "Parser", ->
     parser.should.haveParseResult "banana", undefined
   it "should filter correctly", ->
     parser = letters.filter (l) -> l.length >= 3 and l.length <= 10
-    console.log (strparse parser) "letters"
     parser.should.parse "letters"
     parser.should.not.parse "a"
     parser.should.not.parse "thisverylongsequenceofletters"

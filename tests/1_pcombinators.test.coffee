@@ -14,7 +14,7 @@ ParserState = require "../src/ParserState"
   pipe, compose, tap, parse, strparse
   decide, fail, succeedWith, either
   coroutine, exactly, many, atLeast, atLeast1
-  mapTo, errorMapTo
+  mapTo, errorMapTo, intersperseWith
   namedSequenceOf, sequenceOf
   sepBy, sepBy1, choice, between
   everythingUntil, everyCharUntil
@@ -282,7 +282,15 @@ describe "Parser Combinators", ->
     it "should fail when one of them fail", ->
       parser.should.not.parse "abc"
       parser.should.haveParseError "abc", "ParseError (position 3): Expecting digits"
-  
+
+  describe "intersperseWith", ->
+    parser = (intersperseWith char ',') [letters, digits]
+    it "should parse like a sequence of parsers, but interspersed", ->
+      parser.should.haveParseResult "abc,123", ["abc", "123"]
+    it "should fail when one of them fail", ->
+      parser.should.not.parse "abc"
+      parser.should.haveParseError "abc", "ParseError (position 3): Expecting character ',', got end of input"
+
   describe "sepBy", ->
     parser = (sepBy char ',') letter
     it "should correctly separate input", ->

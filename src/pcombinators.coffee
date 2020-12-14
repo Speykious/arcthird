@@ -173,6 +173,27 @@ sequenceOf = (parsers) ->
     
     return s.resultify results
 
+# intersperseWith :: PStream t => Parser t a d -> [Parser t * *] -> Parser t [*] *
+intersperseWith = (sepParser) -> (parsers) ->
+  new Parser (s) ->
+    if s.isError then return s
+
+    length = parsers.length
+    results = new Array(length)
+    start = true
+    for i in [0...length]
+      unless start
+        outsep = sepParser.pf s
+        if outsep.isError then return outsep
+        s = outsep
+      out = parsers[i].pf s
+      if out.isError then return out
+      s = out
+      results[i] = out.result
+      start = false
+    
+    return s.resultify results
+
 # sepBy :: PStream t => Parser t a d -> Parser t b d -> Parser t [b] d
 sepBy = (sepParser) -> (valParser) ->
   new Parser (s) ->
@@ -345,7 +366,7 @@ module.exports = {
   pipe, compose, tap, parse, strparse
   decide, fail, succeedWith, either
   coroutine, exactly, many, atLeast, atLeast1
-  mapTo, errorMapTo
+  mapTo, errorMapTo, intersperseWith
   namedSequenceOf, sequenceOf
   sepBy, sepBy1, choice, between
   everythingUntil, everyCharUntil
