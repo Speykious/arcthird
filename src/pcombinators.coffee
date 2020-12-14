@@ -38,6 +38,7 @@ compose = (parsers) ->
 # pipeResult :: PStream t => [Parser * * *] -> Parser t * *
 pipeResult = ([p1, parsers...]) ->
   new Parser (s) ->
+    if s.isError then return s
     s = p1.pf s
     for parser in parsers
       if s.isError then break
