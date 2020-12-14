@@ -19,7 +19,16 @@ class Parser
       state = pf s
       return if state.isError then state
       else state.resultify f state.result
-  
+
+  # filter :: PStream t => Parser t a d ~> (a -> Bool) -> Parser t a d
+  filter: (f, emap) ->
+    pf = @pf
+    return new Parser (s) ->
+      state = pf s
+      return if state.isError or f state.result then state
+      else if emap then state.errorify emap state.errorProps()
+      else state.errorify "Result '#{state.result}' did not validate the predicate"
+
   # chain :: PStream t => Parser t a d ~> (a -> Parser t b d) -> Parser t b d
   chain: (f) ->
     pf = @pf
