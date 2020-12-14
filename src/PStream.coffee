@@ -1,6 +1,6 @@
 class PStream
   constructor: (@structure) ->
-    @index = 0
+    #@index = 0
 
   # length :: () -> Int
   length: ->
@@ -10,6 +10,7 @@ class PStream
   elementAt: (i) ->
     throw new Error "The 'next' function has not been implemented"
   
+  ###
   # next :: () -> a
   next: ->
     return if @index < @length()
@@ -23,6 +24,6 @@ class PStream
     while @index - start < n and @index < @length()
       nels.push @next()
     return nels
-
+  ###
   
 module.exports = PStream

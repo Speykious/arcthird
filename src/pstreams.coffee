@@ -61,6 +61,9 @@ class StringPStream extends PStream
     else if (byte & 0xf0) >> 4 is 0b1110 then 3
     else if (byte & 0xf0) >> 4 is 0b1111 then 4
     else 1
+
+  getChar: (index) ->
+    @getUtf8Char index, @getCharWidth index
   
 module.exports = {
   encoder, decoder
