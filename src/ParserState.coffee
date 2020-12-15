@@ -19,13 +19,15 @@ class ParserState
     index:   @index
     result:  @result
   })
-
+  
+  # Welp, I guess this thing is useless
   errorProps: -> ({
     target:  @target
     data:    @data
-    isError: @isError
     error:   @error
+    isError: @isError
     index:   @index
+    result:  @result
   })
 
   dataProps: -> ({
